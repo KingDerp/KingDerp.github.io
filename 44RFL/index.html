@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>44 Responsive - Family Law</title>
+ 
+	<meta charset="UTF-8">
+	
+	<?php /* NEEDED TO MAKE RESPONSIVE: */ ?>
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=1">
+<link rel="shortcut icon" href="https://lawfirmsites.com/assets/images/favicon.png">
+    
+    <link rel='stylesheet' href='style.css' type='text/css' media='all' />
+	
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script> 
+    <script type="text/javascript" src="js/stellar.js"></script>
+    <script>
+    	$(function(){
+    		$.stellar({
+    			horizontalScrolling: false,
+    			verticalScrolling: true,
+    		});
+        });
+		
+		 //scroll drop
+			$(window).scroll(function () {
+  if ( $(this).scrollTop() > 500 && !$('#header').hasClass('open') ) {
+    $('#header').addClass('open');
+    $('#header').slideDown('medium');
+   } else if ( $(this).scrollTop() <= 400 ) {
+    $('#header').removeClass('open');
+    $('#header').slideUp('medium');
+  }
+});
+	//
+	
+	
+    </script>
+</head>
+<body background="images/bg.png" bgcolor="#ffffff" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+    
+    <script>
+        //I am going to do my best to describe what is going on here. I am simply using Javascript to swap out what is visible.
+        //the javascript you see here can be placed anywhere, even in another file, just include it somewhere in the page like any
+        //other .js file.
+        
+        //As soon as the window loads, or if it is resized at all, run our resize function
+        jQuery(document).ready(function() {
+            resize(); 
+        });
+        jQuery(window).resize(function() {
+            resize();
+        });
+        function resize() {
+            //this function finds the browser width and removes the hidden class from the appropriate display
+            //so first, lets make sure each element is hidden
+            jQuery('.responsive').addClass('hidden');
+            var Width = jQuery(window).width()
+            //this just checks the width
+            switch(true) {
+                case (Width > 900):
+                    jQuery('.desktop').removeClass('hidden');
+                    break;
+                case (Width > 600):
+                    jQuery('.ipad').removeClass('hidden');
+                    break;
+                default:
+                    jQuery('.mobile').removeClass('hidden');
+                    break;
+            }
+            //and now the element we want to show is now being displayed.
+            //Now you can just build your designs as you normally do, just create 3 sections like you see below:
+        }
+    </script>
+    
+    <?php /* THIS HERE IS THE DESKTOP VIEW - WHAT IS VISIBLE AT 900px OR MORE */ ?>
+        <div class="desktop responsive hidden">
+            <div id="wrapper">
+                <center>
+                    <header id="header">
+                    	<div class="content">
+                            <img src="images/header.png">
+                    	</div>
+                	</header>
+                </center>
+            	<center>
+            		<div class="part1" data-stellar-background-ratio="0.5"> 
+            			<img src="images/desktop.png"/> 
+            		</div> 
+            	</center> 
+            </div>
+        </div>
+    
+    
+    
+    <?php /* THIS HERE IS THE IPAD VIEW - WHAT IS VISIBLE AT 899-600px */ ?>
+        <div class="ipad responsive hidden">
+            <div id="wrapper">
+            	<center>
+            		<div class="part1" data-stellar-background-ratio="0"> 
+            			<img src="images/ipad.jpg"/> 
+            		</div> 
+            	</center> 
+            </div>
+        </div>
+    
+    
+    
+    <?php /* THIS HERE IS THE MOBILE VIEW - WHAT IS VISIBLE AT 599px OR LESS */ ?>
+        <div class="mobile responsive hidden">
+            <div id="wrapper">
+            	<center>
+            		<div class="part1" data-stellar-background-ratio="0"> 
+            			<img src="images/phone.jpg"/> 
+            		</div> 
+            	</center> 
+            </div>
+        </div>
+        
+        
+</body>
+</html>

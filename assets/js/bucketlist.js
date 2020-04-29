@@ -11020,22 +11020,28 @@ var $author$project$Main$getBucketValsByRow = F2(
 				}),
 			a);
 	});
+var $elm$core$Basics$min = F2(
+	function (x, y) {
+		return (_Utils_cmp(x, y) < 0) ? x : y;
+	});
+var $author$project$Main$getYoungestAge = function (m) {
+	return (!m.client_2_exists) ? m.client_1.age : A2($elm$core$Basics$min, m.client_1.age, m.client_2.age);
+};
 var $author$project$Main$calculateCola = F2(
 	function (age, m) {
 		return (age < 70) ? m.cola_before_70 : (((age >= 70) && (age < 80)) ? m.cola_after_70_and_before_80 : m.cola_after_80);
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$Main$incomeFromAssetsInit = F6(
 	function (i, duration_of_agreement, current_month, starting_age, model, arr) {
 		incomeFromAssetsInit:
 		while (true) {
 			var _default = function () {
 				if (!i) {
-					var _v3 = A2($elm$core$Array$get, i, arr);
-					if (_v3.$ === 'Nothing') {
+					var _v0 = A2($elm$core$Array$get, i, arr);
+					if (_v0.$ === 'Nothing') {
 						return 0.0;
 					} else {
-						var val = _v3.a;
+						var val = _v0.a;
 						return val;
 					}
 				} else {
@@ -11060,9 +11066,6 @@ var $author$project$Main$incomeFromAssetsInit = F6(
 				}
 			}();
 			var calculated_cola = A2($author$project$Main$calculateCola, starting_age + i, model);
-			var _v0 = A2($elm$core$Debug$log, 'arr', arr);
-			var _v1 = A2($elm$core$Debug$log, 'i', i);
-			var _v2 = A2($elm$core$Debug$log, 'default', _default);
 			if (_Utils_eq(i, duration_of_agreement - 1)) {
 				return A3($elm$core$Array$set, i, _default * (1 + calculated_cola), arr);
 			} else {
@@ -11374,7 +11377,7 @@ var $author$project$Main$stringToPercentErrorTuple = function (s) {
 };
 var $author$project$Main$bucketOneForThreePlan = F3(
 	function (income_from_assets, social_security_income, other_income) {
-		return A6($author$project$Main$bucketValues, 0.01, income_from_assets, 5, 5, social_security_income, other_income);
+		return A6($author$project$Main$bucketValues, 0.01, income_from_assets, 6, 6, social_security_income, other_income);
 	});
 var $author$project$Main$bucketThreeForThreePlan = F3(
 	function (income_from_assets, social_security_income, other_income) {
@@ -11382,7 +11385,7 @@ var $author$project$Main$bucketThreeForThreePlan = F3(
 	});
 var $author$project$Main$bucketTwoForThreePlan = F3(
 	function (income_from_assets, social_security_income, other_income) {
-		return A6($author$project$Main$bucketValues, 0.03, income_from_assets, 11, 6, social_security_income, other_income);
+		return A6($author$project$Main$bucketValues, 0.03, income_from_assets, 11, 5, social_security_income, other_income);
 	});
 var $author$project$Main$riskBucket = F4(
 	function (m, income_from_assets, social_security_income, other_income) {
@@ -11860,9 +11863,13 @@ var $author$project$Main$update = F2(
 						$elm$core$Maybe$withDefault,
 						model.current_year - model.client_1.age,
 						$elm$core$String$toInt(n));
+					var youngest_age = A2(
+						$elm$core$Basics$min,
+						birth_year,
+						$author$project$Main$getYoungestAge(model));
+					var end_of_plan = A3($author$project$Main$calculateEndOfPlan, model.current_year, model.max_age, youngest_age);
 					var age = ((model.current_year - birth_year) < 0) ? model.client_1.age : (model.current_year - birth_year);
 					var duration_of_agreement = ((model.max_age - age) < 0) ? 20 : (model.max_age - age);
-					var end_of_plan = A3($author$project$Main$calculateEndOfPlan, model.current_year, model.max_age, age);
 					var out = _Utils_update(
 						client_1,
 						{age: age, birth_year: birth_year});
@@ -11885,6 +11892,11 @@ var $author$project$Main$update = F2(
 						$elm$core$Maybe$withDefault,
 						2020 - 65,
 						$elm$core$String$toInt(n));
+					var youngest_age = A2(
+						$elm$core$Basics$min,
+						birth_year,
+						$author$project$Main$getYoungestAge(model));
+					var end_of_plan = A3($author$project$Main$calculateEndOfPlan, model.current_year, model.max_age, youngest_age);
 					var age = ((model.current_year - birth_year) < 0) ? 65 : (model.current_year - birth_year);
 					var duration_of_agreement = ((model.max_age - age) < 0) ? 20 : (model.max_age - age);
 					var out = _Utils_update(
@@ -11893,7 +11905,12 @@ var $author$project$Main$update = F2(
 					var $temp$msg = $author$project$Main$Calculate,
 						$temp$model = _Utils_update(
 						model,
-						{client_2: out, duration_of_agreement: duration_of_agreement});
+						{
+							client_2: out,
+							duration_of_agreement: duration_of_agreement,
+							possible_end_years: A2($elm$core$List$range, model.current_year + 1, end_of_plan),
+							possible_start_years: A2($elm$core$List$range, model.current_year, end_of_plan - 1)
+						});
 					msg = $temp$msg;
 					model = $temp$model;
 					continue update;
@@ -11926,8 +11943,9 @@ var $author$project$Main$update = F2(
 					continue update;
 				case 'Now':
 					var n = msg.a;
+					var youngest_age = $author$project$Main$getYoungestAge(model);
 					var current_year = A2($elm$time$Time$toYear, $elm$time$Time$utc, n);
-					var end_of_plan = A3($author$project$Main$calculateEndOfPlan, current_year, model.max_age, model.client_1.age);
+					var end_of_plan = A3($author$project$Main$calculateEndOfPlan, current_year, model.max_age, youngest_age);
 					var max_year = current_year + 119;
 					var min_year = current_year - model.max_age;
 					var current_month = A2($elm$time$Time$toMonth, $elm$time$Time$utc, n);
@@ -12141,7 +12159,7 @@ var $author$project$Main$viewOtherIncomeRow = F2(
 												]),
 											_List_fromArray(
 												[
-													$elm$html$Html$text('Name')
+													$elm$html$Html$text('Source of Income')
 												])),
 											A2(
 											$elm$html$Html$input,
@@ -12265,7 +12283,7 @@ var $author$project$Main$viewOtherIncomeRow = F2(
 									$elm$html$Html$div,
 									_List_fromArray(
 										[
-											$elm$html$Html$Attributes$class('flex flex-col justify-center items-end w-1/2')
+											$elm$html$Html$Attributes$class('flex flex-col justify-center items-end w-full')
 										]),
 									_List_fromArray(
 										[
@@ -12286,56 +12304,56 @@ var $author$project$Main$viewOtherIncomeRow = F2(
 													$elm$html$Html$Events$onInput(
 													$author$project$Main$UpdateAnnualGrowthPercentage(
 														$elm$core$String$fromInt(o.id))),
-													$elm$html$Html$Attributes$class('my-2 mx-2 bg-gray-100 text-center rounded w-40 h-10'),
+													$elm$html$Html$Attributes$class('my-2 mx-2 bg-gray-100 text-center rounded w-60 h-10'),
 													$elm$html$Html$Attributes$value(o.growth_rate_input)
 												]),
 											_List_Nil)
-										])),
+										]))
+								])),
+							A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('flex flex-row items-center justify-center w-60 ')
+								]),
+							_List_fromArray(
+								[
 									A2(
-									$elm$html$Html$div,
+									$elm$html$Html$button,
 									_List_fromArray(
 										[
-											$elm$html$Html$Attributes$class('flex flex-row items-center justify-end w-1/2 w-40 ')
+											$elm$html$Html$Events$onClick($author$project$Main$InsertNewIncome),
+											$elm$html$Html$Attributes$class('h-12 my-2 mx-2 bg-gray-100 text-center rounded w-1/2 h-1/2 bg-blue-500 hover:bg-blue-700 text-white font-bold text-2xl'),
+											A2($elm$html$Html$Attributes$style, 'width', '120px'),
+											A2($elm$html$Html$Attributes$style, 'height', '67px'),
+											A2(
+											$elm$html$Html$Attributes$attribute,
+											'name',
+											$elm$core$String$fromInt(o.id))
 										]),
 									_List_fromArray(
 										[
+											$elm$html$Html$text('+')
+										])),
+									A2(
+									$elm$html$Html$button,
+									_List_fromArray(
+										[
 											A2(
-											$elm$html$Html$button,
-											_List_fromArray(
-												[
-													$elm$html$Html$Events$onClick($author$project$Main$InsertNewIncome),
-													$elm$html$Html$Attributes$class('h-12 my-2 mx-2 bg-gray-100 text-center rounded w-1/2 h-1/2 bg-blue-500 hover:bg-blue-700 text-white font-bold text-2xl'),
-													A2($elm$html$Html$Attributes$style, 'width', '72px'),
-													A2($elm$html$Html$Attributes$style, 'height', '67px'),
-													A2(
-													$elm$html$Html$Attributes$attribute,
-													'name',
-													$elm$core$String$fromInt(o.id))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('+')
-												])),
+											$elm$html$Html$Events$on,
+											'click',
+											$author$project$Main$deleteOtherIncomeRowByName($author$project$Main$DeleteIncome)),
+											$elm$html$Html$Attributes$class('h-12 my-2 mx-2 bg-gray-100 text-center rounded w-1/2 h-1/2 bg-blue-500 hover:bg-blue-700 text-white font-bold text-2xl'),
+											A2($elm$html$Html$Attributes$style, 'width', '120px'),
+											A2($elm$html$Html$Attributes$style, 'height', '67px'),
 											A2(
-											$elm$html$Html$button,
-											_List_fromArray(
-												[
-													A2(
-													$elm$html$Html$Events$on,
-													'click',
-													$author$project$Main$deleteOtherIncomeRowByName($author$project$Main$DeleteIncome)),
-													$elm$html$Html$Attributes$class('h-12 my-2 mx-2 bg-gray-100 text-center rounded w-1/2 h-1/2 bg-blue-500 hover:bg-blue-700 text-white font-bold text-2xl'),
-													A2($elm$html$Html$Attributes$style, 'width', '72px'),
-													A2($elm$html$Html$Attributes$style, 'height', '67px'),
-													A2(
-													$elm$html$Html$Attributes$attribute,
-													'name',
-													$elm$core$String$fromInt(o.id))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('-')
-												]))
+											$elm$html$Html$Attributes$attribute,
+											'name',
+											$elm$core$String$fromInt(o.id))
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('-')
 										]))
 								]))
 						])),
@@ -13566,12 +13584,16 @@ var $author$project$Main$createTableDataFrom = F3(
 						var previous_bucket_row = A2($author$project$Main$getBucketValsByRow, i - 1, buckets);
 						var other_monthly_incomes = A2($elm$core$Array$push, 0, m.other_monthly_income_initalized);
 						var other_monthly_annual_income = A2($author$project$Main$getZeroIntOrVal, other_monthly_incomes, i - 1);
-						var gross_income = A2($author$project$Main$getZeroFloatOrVal, income_from_assets, i - 1);
+						var gross_income_base = A2($author$project$Main$getZeroFloatOrVal, income_from_assets, i - 1);
+						var other_income_greater_than_target = (_Utils_cmp(
+							$elm$core$Basics$round(gross_income_base),
+							other_monthly_annual_income) < 0) ? true : false;
+						var gross_income = other_income_greater_than_target ? other_monthly_annual_income : gross_income_base;
 						var income_tax = gross_income * m.tax_rate;
 						var net_annual_income = gross_income - income_tax;
 						var net_income_val = gross_income - income_tax;
 						var net_monthly_income = gross_income - (income_tax / 12);
-						var total_income_from_assets = (gross_income - other_monthly_annual_income) - social_security_annual_income;
+						var total_income_from_assets = other_income_greater_than_target ? 0.0 : ((gross_income - other_monthly_annual_income) - social_security_annual_income);
 						var bucket_row = A2($author$project$Main$getBucketValsByRow, i, buckets);
 						var risk_bucket_val = A2($author$project$Main$getIncomeValOrZero, bucket_row, 5);
 						var bucket_5_val = A2($author$project$Main$getIncomeValOrZero, bucket_row, 4);
@@ -13860,7 +13882,7 @@ var $author$project$Main$viewTargetGrossIncome = function (m) {
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text('Target Annual Income')
+						$elm$html$Html$text('Gross Target Annual Income')
 					])),
 				A2(
 				$elm$html$Html$div,
@@ -13888,8 +13910,8 @@ var $author$project$Main$view = function (model) {
 			[
 				$author$project$Main$viewPlanType(model),
 				$author$project$Main$viewTargetGrossIncome(model),
-				$author$project$Main$viewOtherIncome(model),
 				$author$project$Main$viewSeedFields(model),
+				$author$project$Main$viewOtherIncome(model),
 				A2(
 				$elm$html$Html$div,
 				_List_fromArray(

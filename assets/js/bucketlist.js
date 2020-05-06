@@ -10831,6 +10831,157 @@ var $author$project$Main$bucketValue = F5(
 		var current_bucket_val = (!arr_idx) ? 0.0 : ((arr_idx === 1) ? (asset_payout_required / (1.0 + growth_percentage)) : (is_payout_year ? ((previous_bucket_value / (1.0 + growth_percentage)) + asset_payout_required) : (previous_bucket_value / (1 + growth_percentage))));
 		return (asset_payout_required < 0) ? 0.0 : current_bucket_val;
 	});
+var $elm$core$Elm$JsArray$indexedMap = _JsArray_indexedMap;
+var $elm$core$Array$indexedMap = F2(
+	function (func, _v0) {
+		var len = _v0.a;
+		var tree = _v0.c;
+		var tail = _v0.d;
+		var initialBuilder = {
+			nodeList: _List_Nil,
+			nodeListSize: 0,
+			tail: A3(
+				$elm$core$Elm$JsArray$indexedMap,
+				func,
+				$elm$core$Array$tailIndex(len),
+				tail)
+		};
+		var helper = F2(
+			function (node, builder) {
+				if (node.$ === 'SubTree') {
+					var subTree = node.a;
+					return A3($elm$core$Elm$JsArray$foldl, helper, builder, subTree);
+				} else {
+					var leaf = node.a;
+					var offset = builder.nodeListSize * $elm$core$Array$branchFactor;
+					var mappedLeaf = $elm$core$Array$Leaf(
+						A3($elm$core$Elm$JsArray$indexedMap, func, offset, leaf));
+					return {
+						nodeList: A2($elm$core$List$cons, mappedLeaf, builder.nodeList),
+						nodeListSize: builder.nodeListSize + 1,
+						tail: builder.tail
+					};
+				}
+			});
+		return A2(
+			$elm$core$Array$builderToArray,
+			true,
+			A3($elm$core$Elm$JsArray$foldl, helper, initialBuilder, tree));
+	});
+var $elm$core$Debug$log = _Debug_log;
+var $author$project$Main$reduceNumByPercentageNTimes = F3(
+	function (number_times_reduced, growth_percentage, val) {
+		reduceNumByPercentageNTimes:
+		while (true) {
+			if (number_times_reduced <= 1) {
+				return val / (1.0 + growth_percentage);
+			} else {
+				var $temp$number_times_reduced = number_times_reduced - 1,
+					$temp$growth_percentage = growth_percentage,
+					$temp$val = val / (1.0 + growth_percentage);
+				number_times_reduced = $temp$number_times_reduced;
+				growth_percentage = $temp$growth_percentage;
+				val = $temp$val;
+				continue reduceNumByPercentageNTimes;
+			}
+		}
+	});
+var $author$project$Main$fillInBucketGapsFrom = F3(
+	function (growth_percentage, bucket, gaps) {
+		var gap_index = A2(
+			$elm$core$Maybe$withDefault,
+			1,
+			A2($elm$core$Array$get, 0, gaps));
+		var gap_val = A2(
+			$elm$core$Maybe$withDefault,
+			1,
+			A2($elm$core$Array$get, gap_index, bucket));
+		var _v0 = A2($elm$core$Debug$log, '---------------------------------------------------------------------- ', '');
+		var _v1 = A2(
+			$elm$core$Debug$log,
+			'reduced number',
+			A3($author$project$Main$reduceNumByPercentageNTimes, 3, 0.1, 10.0));
+		var _v2 = A2($elm$core$Debug$log, '---------------------------------------------------------------------- ', '');
+		return A2(
+			$elm$core$Array$indexedMap,
+			F2(
+				function (i, v) {
+					var index_offset = i - gap_index;
+					return _Utils_eq(i, gap_index) ? (v / (1.0 + growth_percentage)) : ((_Utils_cmp(i, gap_index) > 0) ? A3($author$project$Main$reduceNumByPercentageNTimes, index_offset + 1, growth_percentage, gap_val) : v);
+				}),
+			bucket);
+	});
+var $elm$core$Array$filter = F2(
+	function (isGood, array) {
+		return $elm$core$Array$fromList(
+			A3(
+				$elm$core$Array$foldr,
+				F2(
+					function (x, xs) {
+						return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+					}),
+				_List_Nil,
+				array));
+	});
+var $author$project$Main$findIndiciesForBucketGaps = function (arr) {
+	return A2(
+		$elm$core$Array$filter,
+		function (i) {
+			return i > 0;
+		},
+		A2(
+			$elm$core$Array$indexedMap,
+			F2(
+				function (i, v) {
+					var previous_val = A2(
+						$elm$core$Maybe$withDefault,
+						0.0,
+						A2($elm$core$Array$get, i - 1, arr));
+					return (!i) ? 0 : (((previous_val > 0.0) && (v === 0.0)) ? (i - 1) : 0);
+				}),
+			arr));
+};
+var $author$project$Main$fillInBucketGaps = F2(
+	function (growth_percentage, bucket_vals) {
+		return A3(
+			$author$project$Main$fillInBucketGapsFrom,
+			growth_percentage,
+			bucket_vals,
+			$author$project$Main$findIndiciesForBucketGaps(bucket_vals));
+	});
+var $author$project$Main$arrayContainsOnlyZeroes = function (arr) {
+	return (!A3($elm$core$Array$foldr, $elm$core$Basics$add, 0, arr)) ? true : false;
+};
+var $author$project$Main$arrayContainsNZeroes = function (arr) {
+	return $elm$core$Array$length(
+		A2(
+			$elm$core$Array$filter,
+			function (v) {
+				return !v;
+			},
+			arr));
+};
+var $author$project$Main$arrayHasOneZero = function (arr) {
+	return ($author$project$Main$arrayContainsNZeroes(arr) === 1) ? true : false;
+};
+var $author$project$Main$isValidBucket = function (arr) {
+	return $author$project$Main$arrayHasOneZero(arr) || $author$project$Main$arrayContainsOnlyZeroes(arr);
+};
+var $author$project$Main$fixBucketValGaps = F2(
+	function (growth_percentage, bucket_vals) {
+		var out = $author$project$Main$isValidBucket(bucket_vals) ? bucket_vals : A2($author$project$Main$fillInBucketGaps, growth_percentage, bucket_vals);
+		var _v0 = A2($elm$core$Debug$log, '======================================================================', '');
+		var _v1 = A2($elm$core$Debug$log, 'incoming_bucket', bucket_vals);
+		var _v2 = A2($elm$core$Debug$log, '---------------------------------------------------------------------- ', '');
+		var _v3 = A2(
+			$elm$core$Debug$log,
+			'is_valid_bucket',
+			$author$project$Main$isValidBucket(bucket_vals) ? 'Is valid bucket.' : 'Is NOT valid bucket');
+		var _v4 = A2($elm$core$Debug$log, '---------------------------------------------------------------------- ', '');
+		var _v5 = A2($elm$core$Debug$log, 'fixed buckets', out);
+		var _v6 = A2($elm$core$Debug$log, '======================================================================', '');
+		return out;
+	});
 var $elm$core$Array$isEmpty = function (_v0) {
 	var len = _v0.a;
 	return !len;
@@ -10910,14 +11061,17 @@ var $author$project$Main$bucketValues = F6(
 		return $elm$core$Array$isEmpty(incomes_from_assets) ? $elm$core$Array$empty : (((payout_years <= 0) || (total_years <= 0)) ? $elm$core$Array$empty : $elm$core$Array$fromList(
 			$elm$core$List$reverse(
 				$elm$core$Array$toList(
-					A3(
-						$elm$core$List$foldr,
-						calcBucketValue,
-						A2(
-							$elm$core$Array$initialize,
-							total_years,
-							$elm$core$Basics$always(starting_previous_bucket_value)),
-						years)))));
+					A2(
+						$author$project$Main$fixBucketValGaps,
+						growth_percentage,
+						A3(
+							$elm$core$List$foldr,
+							calcBucketValue,
+							A2(
+								$elm$core$Array$initialize,
+								total_years,
+								$elm$core$Basics$always(starting_previous_bucket_value)),
+							years))))));
 	});
 var $author$project$Main$bucket1 = F3(
 	function (income_from_assets, social_security_income, other_income) {
@@ -10972,43 +11126,6 @@ var $author$project$Main$errorIsNone = function (e) {
 var $author$project$Main$getBucketValByRow = F2(
 	function (i, a) {
 		return A2($elm$core$Array$get, i, a);
-	});
-var $elm$core$Elm$JsArray$indexedMap = _JsArray_indexedMap;
-var $elm$core$Array$indexedMap = F2(
-	function (func, _v0) {
-		var len = _v0.a;
-		var tree = _v0.c;
-		var tail = _v0.d;
-		var initialBuilder = {
-			nodeList: _List_Nil,
-			nodeListSize: 0,
-			tail: A3(
-				$elm$core$Elm$JsArray$indexedMap,
-				func,
-				$elm$core$Array$tailIndex(len),
-				tail)
-		};
-		var helper = F2(
-			function (node, builder) {
-				if (node.$ === 'SubTree') {
-					var subTree = node.a;
-					return A3($elm$core$Elm$JsArray$foldl, helper, builder, subTree);
-				} else {
-					var leaf = node.a;
-					var offset = builder.nodeListSize * $elm$core$Array$branchFactor;
-					var mappedLeaf = $elm$core$Array$Leaf(
-						A3($elm$core$Elm$JsArray$indexedMap, func, offset, leaf));
-					return {
-						nodeList: A2($elm$core$List$cons, mappedLeaf, builder.nodeList),
-						nodeListSize: builder.nodeListSize + 1,
-						tail: builder.tail
-					};
-				}
-			});
-		return A2(
-			$elm$core$Array$builderToArray,
-			true,
-			A3($elm$core$Elm$JsArray$foldl, helper, initialBuilder, tree));
 	});
 var $author$project$Main$getBucketValsByRow = F2(
 	function (i, a) {
@@ -11521,6 +11638,9 @@ var $author$project$Main$update = F2(
 		while (true) {
 			switch (msg.$) {
 				case 'Calculate':
+					var starting_list = $elm$core$List$reverse(
+						_List_fromArray(
+							[0, 0, 0, 0, 0, 0, 284865.66515090293, 301957.60505995713, 320075.06136355456, 339279.56504536787, 359636.33894809, 381214.51928497537, 404087.3904420739, 428332.6338685984, 454032.5919007143, 481274.5474147572, 510151.0202596426, 540760.0814752212, 573205.6863637345, 607598.0275455586, 644053.9091982922, 618165.9365459891, 590402.029498527, 560648.0187120159, 528782.8766155322, 494678.3058771635, 458198.30317781604, 419198.6968112479, 377526.65653989953, 333020.17404187005, 285507.51218450675, 234806.62125420227, 180724.52015977266, 123056.64050782888, 61586.131322460824, 0]));
 					var income_asssets = A5($author$project$Main$incomeFromAssetsUsingYearCOLAStartingIncome, model.duration_of_agreement, model.target_gross_income, model.client_1.age, model.current_month_as_int, model);
 					var om = A3($author$project$Main$otherMonthlyIncomesInit, model.duration_of_agreement, model.other_monthly_incomes, income_asssets);
 					var ss = A3($author$project$Main$socialSecurityIncomeInit, model.duration_of_agreement, model, income_asssets);
@@ -11538,6 +11658,10 @@ var $author$project$Main$update = F2(
 									}
 								},
 								A2($author$project$Main$getBucketValsByRow, 0, buckets))));
+					var _v1 = A2(
+						$author$project$Main$fixBucketValGaps,
+						0.04,
+						$elm$core$Array$fromList(starting_list));
 					return (model.duration_of_agreement <= 0) ? _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -11656,9 +11780,9 @@ var $author$project$Main$update = F2(
 						model.other_monthly_income_counter + 1,
 						$elm$core$String$toInt(id));
 					var found = function () {
-						var _v2 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
-						if (_v2.$ === 'Just') {
-							var val = _v2.a;
+						var _v3 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
+						if (_v3.$ === 'Just') {
+							var val = _v3.a;
 							return A3(
 								$elm$core$Dict$insert,
 								i,
@@ -11691,9 +11815,9 @@ var $author$project$Main$update = F2(
 					var error = t.b;
 					var converted_string_float = _Utils_eq(error.error_status, $author$project$Main$None) ? t.a : 0.0;
 					var found = function () {
-						var _v3 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
-						if (_v3.$ === 'Just') {
-							var val = _v3.a;
+						var _v4 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
+						if (_v4.$ === 'Just') {
+							var val = _v4.a;
 							return A3(
 								$elm$core$Dict$insert,
 								i,
@@ -11727,9 +11851,9 @@ var $author$project$Main$update = F2(
 						model.other_monthly_income_counter + 1,
 						$elm$core$String$toInt(id));
 					var found = function () {
-						var _v4 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
-						if (_v4.$ === 'Just') {
-							var val = _v4.a;
+						var _v5 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
+						if (_v5.$ === 'Just') {
+							var val = _v5.a;
 							return A3(
 								$elm$core$Dict$insert,
 								i,
@@ -11763,9 +11887,9 @@ var $author$project$Main$update = F2(
 						model.other_monthly_income_counter + 1,
 						$elm$core$String$toInt(id));
 					var found = function () {
-						var _v5 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
-						if (_v5.$ === 'Just') {
-							var val = _v5.a;
+						var _v6 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
+						if (_v6.$ === 'Just') {
+							var val = _v6.a;
 							return A3(
 								$elm$core$Dict$insert,
 								i,
@@ -11798,9 +11922,9 @@ var $author$project$Main$update = F2(
 						$elm$core$String$toInt(id));
 					var error = t.b;
 					var found = function () {
-						var _v6 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
-						if (_v6.$ === 'Just') {
-							var val = _v6.a;
+						var _v7 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
+						if (_v7.$ === 'Just') {
+							var val = _v7.a;
 							return A3(
 								$elm$core$Dict$insert,
 								i,

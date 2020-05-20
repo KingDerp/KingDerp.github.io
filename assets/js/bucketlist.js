@@ -11111,6 +11111,56 @@ var $author$project$Main$allBuckets = F4(
 								A3($author$project$Main$bucket1, income_from_assets, social_security_income, other_income),
 								outer_array))))));
 	});
+var $author$project$Main$EmptyInput = {$: 'EmptyInput'};
+var $author$project$Main$emptyInputError = function (field_name) {
+	var message = field_name + ' Cannot Be Empty';
+	return A2($author$project$Main$Error, message, $author$project$Main$EmptyInput);
+};
+var $author$project$Main$PositiveFloatOnly = {$: 'PositiveFloatOnly'};
+var $author$project$Main$percentSyntaxOnlyError = function (field_name) {
+	var message = field_name + ' Must Be between 1 and 100 or include a decimal. Ex: 100% 100.5 56 84.3 etc. Only nine digits of precision are allowed. ';
+	return A2($author$project$Main$Error, message, $author$project$Main$PositiveFloatOnly);
+};
+var $author$project$Main$positiveFloatOnlyError = function (field_name) {
+	var message = field_name + ' Must Be a Positive Number.';
+	return A2($author$project$Main$Error, message, $author$project$Main$PositiveFloatOnly);
+};
+var $author$project$Main$PositiveIntOnly = {$: 'PositiveIntOnly'};
+var $author$project$Main$positiveIntOnlyError = function (field_name) {
+	var message = field_name + ' Must Be a Positive Whole Number.';
+	return A2($author$project$Main$Error, message, $author$project$Main$PositiveIntOnly);
+};
+var $author$project$Main$Unknown = {$: 'Unknown'};
+var $author$project$Main$unknownError = A2($author$project$Main$Error, '', $author$project$Main$Unknown);
+var $author$project$Main$buildError = F2(
+	function (field_name, error_status) {
+		switch (error_status.$) {
+			case 'None':
+				return $author$project$Main$noError;
+			case 'EmptyInput':
+				return $author$project$Main$emptyInputError(field_name);
+			case 'PositiveIntOnly':
+				return $author$project$Main$positiveIntOnlyError(field_name);
+			case 'PositiveFloatOnly':
+				return $author$project$Main$positiveFloatOnlyError(field_name);
+			case 'MalformedPercent':
+				return $author$project$Main$percentSyntaxOnlyError(field_name);
+			default:
+				return $author$project$Main$unknownError;
+		}
+	});
+var $author$project$Main$buildAnnualGrowthPercentageError = function (es) {
+	return A2($author$project$Main$buildError, 'Annual Growth Percentage', es);
+};
+var $author$project$Main$buildOtherMonthlyIncomeError = function (es) {
+	return A2($author$project$Main$buildError, 'Monthly Income', es);
+};
+var $author$project$Main$buildSocialSecIncomeError = function (es) {
+	return A2($author$project$Main$buildError, 'Estimated Social Security Monthly Income', es);
+};
+var $author$project$Main$buildTargetIncomeError = function (es) {
+	return A2($author$project$Main$buildError, 'Target Gross Annual Income', es);
+};
 var $author$project$Main$errorIsNone = function (e) {
 	return _Utils_eq(e.error_status, $author$project$Main$None);
 };
@@ -11369,47 +11419,6 @@ var $author$project$Main$socialSecurityIncomeInit = F3(
 			0)));
 		return (duration <= 0) ? $elm$core$Array$empty : out;
 	});
-var $author$project$Main$EmptyInput = {$: 'EmptyInput'};
-var $author$project$Main$emptyInputError = function (field_name) {
-	var message = field_name + ' Cannot Be Empty';
-	return A2($author$project$Main$Error, message, $author$project$Main$EmptyInput);
-};
-var $author$project$Main$PositiveFloatOnly = {$: 'PositiveFloatOnly'};
-var $author$project$Main$percentSyntaxOnlyError = function (field_name) {
-	var message = field_name + ' Must Be between 1 and 100 or include a decimal. Ex: 100% 100.5 56 84.3 etc. Only nine digits of precision are allowed. ';
-	return A2($author$project$Main$Error, message, $author$project$Main$PositiveFloatOnly);
-};
-var $author$project$Main$positiveFloatOnlyError = function (field_name) {
-	var message = field_name + ' Must Be a Positive Number.';
-	return A2($author$project$Main$Error, message, $author$project$Main$PositiveFloatOnly);
-};
-var $author$project$Main$PositiveIntOnly = {$: 'PositiveIntOnly'};
-var $author$project$Main$positiveIntOnlyError = function (field_name) {
-	var message = field_name + ' Must Be a Positive Whole Number.';
-	return A2($author$project$Main$Error, message, $author$project$Main$PositiveIntOnly);
-};
-var $author$project$Main$Unknown = {$: 'Unknown'};
-var $author$project$Main$unknownError = A2($author$project$Main$Error, '', $author$project$Main$Unknown);
-var $author$project$Main$buildError = F2(
-	function (field_name, error_status) {
-		switch (error_status.$) {
-			case 'None':
-				return $author$project$Main$noError;
-			case 'EmptyInput':
-				return $author$project$Main$emptyInputError(field_name);
-			case 'PositiveIntOnly':
-				return $author$project$Main$positiveIntOnlyError(field_name);
-			case 'PositiveFloatOnly':
-				return $author$project$Main$positiveFloatOnlyError(field_name);
-			case 'MalformedPercent':
-				return $author$project$Main$percentSyntaxOnlyError(field_name);
-			default:
-				return $author$project$Main$unknownError;
-		}
-	});
-var $author$project$Main$buildTargetIncomeError = function (es) {
-	return A2($author$project$Main$buildError, 'Target Gross Annual Income', es);
-};
 var $elm$core$String$toFloat = _String_toFloat;
 var $elm$regex$Regex$Match = F4(
 	function (match, index, number, submatches) {
@@ -11431,19 +11440,17 @@ var $author$project$Main$positiveFloatRegex = A2(
 var $author$project$Main$validateAsPositiveFloat = function (s) {
 	return (s === '') ? $author$project$Main$EmptyInput : (A2($elm$regex$Regex$contains, $author$project$Main$positiveFloatRegex, s) ? $author$project$Main$None : $author$project$Main$PositiveIntOnly);
 };
-var $author$project$Main$stringToFloatErrorTuple = function (s) {
-	var status = $author$project$Main$validateAsPositiveFloat(s);
-	var i = A2(
-		$elm$core$Maybe$withDefault,
-		1.0,
-		$elm$core$String$toFloat(s));
-	return _Utils_Tuple2(
-		i,
-		$author$project$Main$buildTargetIncomeError(status));
-};
-var $author$project$Main$buildOtherMonthlyIncomeError = function (es) {
-	return A2($author$project$Main$buildError, 'Monthly Income', es);
-};
+var $author$project$Main$stringToFloatErrorTuple = F2(
+	function (s, error_builder) {
+		var status = $author$project$Main$validateAsPositiveFloat(s);
+		var i = A2(
+			$elm$core$Maybe$withDefault,
+			1.0,
+			$elm$core$String$toFloat(s));
+		return _Utils_Tuple2(
+			i,
+			error_builder(status));
+	});
 var $author$project$Main$positiveIntRegex = A2(
 	$elm$core$Maybe$withDefault,
 	$elm$regex$Regex$never,
@@ -11451,19 +11458,17 @@ var $author$project$Main$positiveIntRegex = A2(
 var $author$project$Main$validateAsPositiveInt = function (s) {
 	return (s === '') ? $author$project$Main$EmptyInput : (A2($elm$regex$Regex$contains, $author$project$Main$positiveIntRegex, s) ? $author$project$Main$None : $author$project$Main$PositiveIntOnly);
 };
-var $author$project$Main$stringToIntErrorTuple = function (s) {
-	var status = $author$project$Main$validateAsPositiveInt(s);
-	var i = A2(
-		$elm$core$Maybe$withDefault,
-		1,
-		$elm$core$String$toInt(s));
-	return _Utils_Tuple2(
-		i,
-		$author$project$Main$buildOtherMonthlyIncomeError(status));
-};
-var $author$project$Main$buildAnnualGrowthPercentageError = function (es) {
-	return A2($author$project$Main$buildError, 'Annual Growth Percentage', es);
-};
+var $author$project$Main$stringToIntErrorTuple = F2(
+	function (s, error_builder) {
+		var status = $author$project$Main$validateAsPositiveInt(s);
+		var i = A2(
+			$elm$core$Maybe$withDefault,
+			1,
+			$elm$core$String$toInt(s));
+		return _Utils_Tuple2(
+			i,
+			error_builder(status));
+	});
 var $elm$core$String$replace = F3(
 	function (before, after, string) {
 		return A2(
@@ -11487,13 +11492,14 @@ var $author$project$Main$floatAsPercent = A2(
 var $author$project$Main$validateFloatAsPercent = function (s) {
 	return (s === '') ? $author$project$Main$EmptyInput : (A2($elm$regex$Regex$contains, $author$project$Main$floatAsPercent, s) ? $author$project$Main$None : $author$project$Main$MalformedPercent);
 };
-var $author$project$Main$stringToPercentErrorTuple = function (s) {
-	var status = $author$project$Main$validateFloatAsPercent(s);
-	var i = $author$project$Main$percentageToFloat(s);
-	return _Utils_Tuple2(
-		i,
-		$author$project$Main$buildAnnualGrowthPercentageError(status));
-};
+var $author$project$Main$stringToPercentErrorTuple = F2(
+	function (s, error_builder) {
+		var status = $author$project$Main$validateFloatAsPercent(s);
+		var i = $author$project$Main$percentageToFloat(s);
+		return _Utils_Tuple2(
+			i,
+			error_builder(status));
+	});
 var $author$project$Main$bucketOneForThreePlan = F3(
 	function (income_from_assets, social_security_income, other_income) {
 		return A6($author$project$Main$bucketValues, 0.01, income_from_assets, 6, 6, social_security_income, other_income);
@@ -11676,7 +11682,7 @@ var $author$project$Main$update = F2(
 					continue update;
 				case 'UpdateStartingIncome':
 					var s = msg.a;
-					var t = $author$project$Main$stringToFloatErrorTuple(s);
+					var t = A2($author$project$Main$stringToFloatErrorTuple, s, $author$project$Main$buildTargetIncomeError);
 					var i = t.a;
 					var error = t.b;
 					var $temp$msg = $author$project$Main$Calculate,
@@ -11693,7 +11699,7 @@ var $author$project$Main$update = F2(
 					continue update;
 				case 'UpdateStartingIncomeAsQuiz':
 					var s = msg.a;
-					var t = $author$project$Main$stringToFloatErrorTuple(s);
+					var t = A2($author$project$Main$stringToFloatErrorTuple, s, $author$project$Main$buildTargetIncomeError);
 					var quiz_from_model = model.quiz;
 					var i = t.a;
 					var error = t.b;
@@ -11749,7 +11755,7 @@ var $author$project$Main$update = F2(
 					continue update;
 				case 'UpdateSocialSecurityMontlhlyIncomeClient1':
 					var s = msg.a;
-					var t = $author$project$Main$stringToFloatErrorTuple(s);
+					var t = A2($author$project$Main$stringToFloatErrorTuple, s, $author$project$Main$buildSocialSecIncomeError);
 					var monthly_income = t.a;
 					var error = t.b;
 					var client_1 = model.client_1;
@@ -11770,7 +11776,7 @@ var $author$project$Main$update = F2(
 					continue update;
 				case 'UpdateSocialSecurityMontlhlyIncomeClient2':
 					var s = msg.a;
-					var t = $author$project$Main$stringToFloatErrorTuple(s);
+					var t = A2($author$project$Main$stringToFloatErrorTuple, s, $author$project$Main$buildSocialSecIncomeError);
 					var monthly_income = t.a;
 					var error = t.b;
 					var client_2 = model.client_2;
@@ -11824,7 +11830,7 @@ var $author$project$Main$update = F2(
 				case 'UpdateOtherMonthlyIncome':
 					var id = msg.a;
 					var value = msg.b;
-					var t = $author$project$Main$stringToIntErrorTuple(value);
+					var t = A2($author$project$Main$stringToIntErrorTuple, value, $author$project$Main$buildOtherMonthlyIncomeError);
 					var i = A2(
 						$elm$core$Maybe$withDefault,
 						model.other_monthly_income_counter + 1,
@@ -11931,7 +11937,7 @@ var $author$project$Main$update = F2(
 				case 'UpdateAnnualGrowthPercentage':
 					var id = msg.a;
 					var value = msg.b;
-					var t = $author$project$Main$stringToPercentErrorTuple(value);
+					var t = A2($author$project$Main$stringToPercentErrorTuple, value, $author$project$Main$buildAnnualGrowthPercentageError);
 					var percent_as_float = t.a;
 					var i = A2(
 						$elm$core$Maybe$withDefault,
@@ -12182,8 +12188,8 @@ var $author$project$Main$update = F2(
 				case 'ToggleHasAnsweredDateOfBirth':
 					var client_1_estimate = msg.a;
 					var client_2_estimate = msg.b;
-					var t_client_2 = $author$project$Main$stringToFloatErrorTuple(client_2_estimate);
-					var t_client_1 = $author$project$Main$stringToFloatErrorTuple(client_1_estimate);
+					var t_client_2 = A2($author$project$Main$stringToFloatErrorTuple, client_2_estimate, $author$project$Main$buildSocialSecIncomeError);
+					var t_client_1 = A2($author$project$Main$stringToFloatErrorTuple, client_1_estimate, $author$project$Main$buildSocialSecIncomeError);
 					var quiz_from_model = model.quiz;
 					var client_2_monthly_income = t_client_2.a;
 					var client_2_error = t_client_2.b;
@@ -13026,7 +13032,7 @@ var $author$project$Main$viewSocialSecurityInputs = F3(
 								]),
 							_List_fromArray(
 								[
-									$elm$html$Html$text('Estimated Income:')
+									$elm$html$Html$text('Estimated Monthly Income:')
 								])),
 							A2(
 							$elm$html$Html$input,
@@ -13979,15 +13985,19 @@ var $author$project$Main$createTableDataFrom = F3(
 						var other_monthly_incomes = A2($elm$core$Array$push, 0, m.other_monthly_income_initalized);
 						var other_monthly_annual_income = A2($author$project$Main$getZeroIntOrVal, other_monthly_incomes, i - 1);
 						var gross_income_base = A2($author$project$Main$getZeroFloatOrVal, income_from_assets, i - 1);
-						var other_income_greater_than_target = (_Utils_cmp(
+						var income_greater_than_target = (_Utils_cmp(
 							$elm$core$Basics$round(gross_income_base),
-							other_monthly_annual_income) < 0) ? true : false;
-						var gross_income = other_income_greater_than_target ? other_monthly_annual_income : gross_income_base;
+							other_monthly_annual_income) < 0) ? true : ((_Utils_cmp(
+							$elm$core$Basics$round(gross_income_base),
+							social_security_annual_income) < 0) ? true : ((_Utils_cmp(
+							$elm$core$Basics$round(gross_income_base),
+							social_security_annual_income + other_monthly_annual_income) < 0) ? true : false));
+						var gross_income = income_greater_than_target ? (other_monthly_annual_income + social_security_annual_income) : gross_income_base;
 						var income_tax = gross_income * m.tax_rate;
 						var net_annual_income = gross_income - income_tax;
 						var net_income_val = gross_income - income_tax;
 						var net_monthly_income = gross_income - (income_tax / 12);
-						var total_income_from_assets = other_income_greater_than_target ? 0.0 : ((gross_income - other_monthly_annual_income) - social_security_annual_income);
+						var total_income_from_assets = income_greater_than_target ? 0.0 : ((gross_income - other_monthly_annual_income) - social_security_annual_income);
 						var bucket_row = A2($author$project$Main$getBucketValsByRow, i, buckets);
 						var risk_bucket_val = A2($author$project$Main$getIncomeValOrZero, bucket_row, 5);
 						var bucket_5_val = A2($author$project$Main$getIncomeValOrZero, bucket_row, 4);

@@ -10810,7 +10810,7 @@ var $author$project$Main$init = function (_v0) {
 			possible_birth_years: A2($elm$core$List$range, current_year - max_age, current_year),
 			possible_end_years: A2($elm$core$List$range, current_year - 1, end_of_plan),
 			possible_start_years: A2($elm$core$List$range, current_year, end_of_plan - 1),
-			quiz: {answered_factor_in_social_sec: false, answered_num_people: false, date_of_birth: false, factor_in_other_income: false, factor_in_social_sec: true, gross_target_income: false, other_income: false, plan_for_1_person_is_selected: true, plan_for_2_people_is_selected: false, social_sec_estimate: false},
+			quiz: {answered_factor_in_other_income: false, answered_factor_in_social_sec: false, answered_num_people: false, date_of_birth: false, factor_in_other_income: false, factor_in_social_sec: true, gross_target_income: false, other_income: false, plan_for_1_person_is_selected: true, plan_for_2_people_is_selected: false, social_sec_estimate: false},
 			required_starting_assets: 0,
 			show_full_calculator: false,
 			social_security_growth_rate: 0.005,
@@ -11118,7 +11118,7 @@ var $author$project$Main$emptyInputError = function (field_name) {
 };
 var $author$project$Main$PositiveFloatOnly = {$: 'PositiveFloatOnly'};
 var $author$project$Main$percentSyntaxOnlyError = function (field_name) {
-	var message = field_name + ' Must Be between 1 and 100 or include a decimal. Ex: 100% 100.5 56 84.3 etc. Only nine digits of precision are allowed. ';
+	var message = field_name + ' Must Be between 1 and 100 or include a decimal. Ex: 100% 90.5 56 84.3 etc. Only nine digits of precision are allowed. ';
 	return A2($author$project$Main$Error, message, $author$project$Main$PositiveFloatOnly);
 };
 var $author$project$Main$positiveFloatOnlyError = function (field_name) {
@@ -11161,6 +11161,27 @@ var $author$project$Main$buildSocialSecIncomeError = function (es) {
 var $author$project$Main$buildTargetIncomeError = function (es) {
 	return A2($author$project$Main$buildError, 'Target Gross Annual Income', es);
 };
+var $elm$core$String$replace = F3(
+	function (before, after, string) {
+		return A2(
+			$elm$core$String$join,
+			after,
+			A2($elm$core$String$split, before, string));
+	});
+var $author$project$Main$removeCommasAndDollarSigns = function (s) {
+	return A3(
+		$elm$core$String$replace,
+		'$',
+		'',
+		A3($elm$core$String$replace, ',', '', s));
+};
+var $author$project$Main$removeFirstZero = function (s) {
+	return (A2($elm$core$String$left, 1, s) === '0') ? A3($elm$core$String$replace, '0', '', s) : s;
+};
+var $author$project$Main$cleanString = function (s) {
+	return $author$project$Main$removeFirstZero(
+		$author$project$Main$removeCommasAndDollarSigns(s));
+};
 var $author$project$Main$errorIsNone = function (e) {
 	return _Utils_eq(e.error_status, $author$project$Main$None);
 };
@@ -11175,6 +11196,11 @@ var $elm$core$List$filter = F2(
 			_List_Nil,
 			list);
 	});
+var $author$project$Main$formatStringAsPercent = function (s) {
+	var clean = $author$project$Main$cleanString(
+		A3($elm$core$String$replace, '%', '', s));
+	return clean + '%';
+};
 var $author$project$Main$getBucketValByRow = F2(
 	function (i, a) {
 		return A2($elm$core$Array$get, i, a);
@@ -11193,9 +11219,10 @@ var $elm$core$Basics$min = F2(
 	function (x, y) {
 		return (_Utils_cmp(x, y) < 0) ? x : y;
 	});
-var $author$project$Main$getYoungestAge = function (m) {
-	return (!m.client_2_exists) ? m.client_1.age : A2($elm$core$Basics$min, m.client_1.age, m.client_2.age);
-};
+var $author$project$Main$getYoungestAge = F3(
+	function (client_2_exists, age_client_1, age_client_2) {
+		return client_2_exists ? A2($elm$core$Basics$min, age_client_1, age_client_2) : age_client_1;
+	});
 var $author$project$Main$calculateCola = F2(
 	function (age, m) {
 		return (age < 70) ? m.cola_before_70 : (((age >= 70) && (age < 80)) ? m.cola_after_70_and_before_80 : m.cola_after_80);
@@ -11276,6 +11303,7 @@ var $author$project$Main$incomeFromAssetsUsingYearCOLAStartingIncome = F5(
 		var arr = A2($elm$core$Array$repeat, duration_of_agreement, target_gross_income);
 		return $elm$core$Array$isEmpty(arr) ? arr : A6($author$project$Main$incomeFromAssetsInit, 0, duration_of_agreement, starting_age, current_month, model, arr);
 	});
+var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Elm$JsArray$map = _JsArray_map;
 var $elm$core$Array$map = F2(
 	function (func, _v0) {
@@ -11433,16 +11461,22 @@ var $elm$regex$Regex$fromString = function (string) {
 		string);
 };
 var $elm$regex$Regex$never = _Regex_never;
-var $author$project$Main$positiveFloatRegex = A2(
+var $author$project$Main$positiveIntRegex = A2(
 	$elm$core$Maybe$withDefault,
 	$elm$regex$Regex$never,
-	$elm$regex$Regex$fromString('^[0-9]+\\.?[0-9]+$'));
-var $author$project$Main$validateAsPositiveFloat = function (s) {
-	return (s === '') ? $author$project$Main$EmptyInput : (A2($elm$regex$Regex$contains, $author$project$Main$positiveFloatRegex, s) ? $author$project$Main$None : $author$project$Main$PositiveIntOnly);
+	$elm$regex$Regex$fromString('^[1-9]\\d*$'));
+var $author$project$Main$validateAsPositiveInt = function (s) {
+	var clean_string = $author$project$Main$removeCommasAndDollarSigns(s);
+	var _v0 = A2($elm$core$Debug$log, 'string in', clean_string);
+	var _v1 = A2(
+		$elm$core$Debug$log,
+		'Error Status from String in',
+		(s === '') ? $author$project$Main$EmptyInput : (A2($elm$regex$Regex$contains, $author$project$Main$positiveIntRegex, s) ? $author$project$Main$None : $author$project$Main$PositiveIntOnly));
+	return (s === '') ? $author$project$Main$EmptyInput : (A2($elm$regex$Regex$contains, $author$project$Main$positiveIntRegex, clean_string) ? $author$project$Main$None : $author$project$Main$PositiveIntOnly);
 };
 var $author$project$Main$stringToFloatErrorTuple = F2(
 	function (s, error_builder) {
-		var status = $author$project$Main$validateAsPositiveFloat(s);
+		var status = $author$project$Main$validateAsPositiveInt(s);
 		var i = A2(
 			$elm$core$Maybe$withDefault,
 			1.0,
@@ -11451,13 +11485,6 @@ var $author$project$Main$stringToFloatErrorTuple = F2(
 			i,
 			error_builder(status));
 	});
-var $author$project$Main$positiveIntRegex = A2(
-	$elm$core$Maybe$withDefault,
-	$elm$regex$Regex$never,
-	$elm$regex$Regex$fromString('^[1-9]\\d*$'));
-var $author$project$Main$validateAsPositiveInt = function (s) {
-	return (s === '') ? $author$project$Main$EmptyInput : (A2($elm$regex$Regex$contains, $author$project$Main$positiveIntRegex, s) ? $author$project$Main$None : $author$project$Main$PositiveIntOnly);
-};
 var $author$project$Main$stringToIntErrorTuple = F2(
 	function (s, error_builder) {
 		var status = $author$project$Main$validateAsPositiveInt(s);
@@ -11468,13 +11495,6 @@ var $author$project$Main$stringToIntErrorTuple = F2(
 		return _Utils_Tuple2(
 			i,
 			error_builder(status));
-	});
-var $elm$core$String$replace = F3(
-	function (before, after, string) {
-		return A2(
-			$elm$core$String$join,
-			after,
-			A2($elm$core$String$split, before, string));
 	});
 var $author$project$Main$percentageToFloat = function (s) {
 	var cleaned = A2(
@@ -11682,9 +11702,15 @@ var $author$project$Main$update = F2(
 					continue update;
 				case 'UpdateStartingIncome':
 					var s = msg.a;
-					var t = A2($author$project$Main$stringToFloatErrorTuple, s, $author$project$Main$buildTargetIncomeError);
+					var no_commas = $author$project$Main$cleanString(s);
+					var t = A2($author$project$Main$stringToFloatErrorTuple, no_commas, $author$project$Main$buildTargetIncomeError);
 					var i = t.a;
 					var error = t.b;
+					var _v2 = A2($elm$core$Debug$log, '==============================================================================================', '');
+					var _v3 = A2($elm$core$Debug$log, 'String without formating ', s);
+					var _v4 = A2($elm$core$Debug$log, 'clean string', no_commas);
+					var _v5 = A2($elm$core$Debug$log, 'target_gross_income', i);
+					var _v6 = A2($elm$core$Debug$log, 'target_gross_income_as_string', t);
 					var $temp$msg = $author$project$Main$Calculate,
 						$temp$model = _Utils_update(
 						model,
@@ -11697,10 +11723,23 @@ var $author$project$Main$update = F2(
 					msg = $temp$msg;
 					model = $temp$model;
 					continue update;
+				case 'ToggleGrossTargetIncome':
+					var quiz_from_model = model.quiz;
+					var quiz = _Utils_update(
+						quiz_from_model,
+						{gross_target_income: !model.quiz.gross_target_income});
+					var $temp$msg = $author$project$Main$Calculate,
+						$temp$model = _Utils_update(
+						model,
+						{quiz: quiz});
+					msg = $temp$msg;
+					model = $temp$model;
+					continue update;
 				case 'UpdateStartingIncomeAsQuiz':
 					var s = msg.a;
-					var t = A2($author$project$Main$stringToFloatErrorTuple, s, $author$project$Main$buildTargetIncomeError);
 					var quiz_from_model = model.quiz;
+					var no_commas = $author$project$Main$cleanString(s);
+					var t = A2($author$project$Main$stringToFloatErrorTuple, no_commas, $author$project$Main$buildTargetIncomeError);
 					var i = t.a;
 					var error = t.b;
 					var quiz = _Utils_eq(error.error_status, $author$project$Main$None) ? _Utils_update(
@@ -11755,10 +11794,11 @@ var $author$project$Main$update = F2(
 					continue update;
 				case 'UpdateSocialSecurityMontlhlyIncomeClient1':
 					var s = msg.a;
-					var t = A2($author$project$Main$stringToFloatErrorTuple, s, $author$project$Main$buildSocialSecIncomeError);
-					var monthly_income = t.a;
-					var error = t.b;
 					var client_1 = model.client_1;
+					var clean_string = $author$project$Main$cleanString(s);
+					var t = A2($author$project$Main$stringToFloatErrorTuple, clean_string, $author$project$Main$buildSocialSecIncomeError);
+					var error = t.b;
+					var monthly_income = t.a;
 					var out = _Utils_update(
 						client_1,
 						{
@@ -11776,10 +11816,11 @@ var $author$project$Main$update = F2(
 					continue update;
 				case 'UpdateSocialSecurityMontlhlyIncomeClient2':
 					var s = msg.a;
-					var t = A2($author$project$Main$stringToFloatErrorTuple, s, $author$project$Main$buildSocialSecIncomeError);
-					var monthly_income = t.a;
-					var error = t.b;
 					var client_2 = model.client_2;
+					var clean_string = $author$project$Main$cleanString(s);
+					var t = A2($author$project$Main$stringToFloatErrorTuple, clean_string, $author$project$Main$buildSocialSecIncomeError);
+					var error = t.b;
+					var monthly_income = t.a;
 					var out = _Utils_update(
 						client_2,
 						{
@@ -11803,9 +11844,9 @@ var $author$project$Main$update = F2(
 						model.other_monthly_income_counter + 1,
 						$elm$core$String$toInt(id));
 					var found = function () {
-						var _v2 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
-						if (_v2.$ === 'Just') {
-							var val = _v2.a;
+						var _v7 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
+						if (_v7.$ === 'Just') {
+							var val = _v7.a;
 							return A3(
 								$elm$core$Dict$insert,
 								i,
@@ -11830,29 +11871,30 @@ var $author$project$Main$update = F2(
 				case 'UpdateOtherMonthlyIncome':
 					var id = msg.a;
 					var value = msg.b;
-					var t = A2($author$project$Main$stringToIntErrorTuple, value, $author$project$Main$buildOtherMonthlyIncomeError);
 					var i = A2(
 						$elm$core$Maybe$withDefault,
 						model.other_monthly_income_counter + 1,
 						$elm$core$String$toInt(id));
+					var clean = $author$project$Main$cleanString(value);
+					var t = A2($author$project$Main$stringToIntErrorTuple, clean, $author$project$Main$buildOtherMonthlyIncomeError);
 					var error = t.b;
 					var converted_string_float = _Utils_eq(error.error_status, $author$project$Main$None) ? t.a : 0.0;
 					var found = function () {
-						var _v3 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
-						if (_v3.$ === 'Just') {
-							var val = _v3.a;
+						var _v8 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
+						if (_v8.$ === 'Just') {
+							var val = _v8.a;
 							return A3(
 								$elm$core$Dict$insert,
 								i,
 								_Utils_update(
 									val,
-									{error: error, starting_monthly_income: converted_string_float, starting_monthly_income_input: value}),
+									{error: error, starting_monthly_income: converted_string_float, starting_monthly_income_input: clean}),
 								model.other_monthly_incomes);
 						} else {
 							return A2(
 								$elm$core$Dict$singleton,
 								i,
-								{end_year_after_retirement: model.current_year + model.duration_of_agreement, end_year_after_retirement_input: '', error: $author$project$Main$noError, growth_rate: 0.05, growth_rate_input: '', id: i, name: '', start_year_after_retirement: model.current_year, start_year_after_retirement_input: '', starting_monthly_income: 0.0, starting_monthly_income_input: value});
+								{end_year_after_retirement: model.current_year + model.duration_of_agreement, end_year_after_retirement_input: '', error: $author$project$Main$noError, growth_rate: 0.05, growth_rate_input: '', id: i, name: '', start_year_after_retirement: model.current_year, start_year_after_retirement_input: '', starting_monthly_income: 0.0, starting_monthly_income_input: clean});
 						}
 					}();
 					var $temp$msg = $author$project$Main$Calculate,
@@ -11874,9 +11916,9 @@ var $author$project$Main$update = F2(
 						model.other_monthly_income_counter + 1,
 						$elm$core$String$toInt(id));
 					var found = function () {
-						var _v4 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
-						if (_v4.$ === 'Just') {
-							var val = _v4.a;
+						var _v9 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
+						if (_v9.$ === 'Just') {
+							var val = _v9.a;
 							return A3(
 								$elm$core$Dict$insert,
 								i,
@@ -11910,9 +11952,9 @@ var $author$project$Main$update = F2(
 						model.other_monthly_income_counter + 1,
 						$elm$core$String$toInt(id));
 					var found = function () {
-						var _v5 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
-						if (_v5.$ === 'Just') {
-							var val = _v5.a;
+						var _v10 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
+						if (_v10.$ === 'Just') {
+							var val = _v10.a;
 							return A3(
 								$elm$core$Dict$insert,
 								i,
@@ -11945,15 +11987,19 @@ var $author$project$Main$update = F2(
 						$elm$core$String$toInt(id));
 					var error = t.b;
 					var found = function () {
-						var _v6 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
-						if (_v6.$ === 'Just') {
-							var val = _v6.a;
+						var _v11 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
+						if (_v11.$ === 'Just') {
+							var val = _v11.a;
 							return A3(
 								$elm$core$Dict$insert,
 								i,
 								_Utils_update(
 									val,
-									{error: error, growth_rate: percent_as_float, growth_rate_input: value}),
+									{
+										error: error,
+										growth_rate: percent_as_float,
+										growth_rate_input: $author$project$Main$formatStringAsPercent(value)
+									}),
 								model.other_monthly_incomes);
 						} else {
 							return A2(
@@ -12010,16 +12056,13 @@ var $author$project$Main$update = F2(
 						$elm$core$Maybe$withDefault,
 						model.current_year - model.client_1.age,
 						$elm$core$String$toInt(n));
-					var youngest_age = A2(
-						$elm$core$Basics$min,
-						birth_year,
-						$author$project$Main$getYoungestAge(model));
-					var end_of_plan = A3($author$project$Main$calculateEndOfPlan, model.current_year, model.max_age, youngest_age);
 					var age = ((model.current_year - birth_year) < 0) ? model.client_1.age : (model.current_year - birth_year);
-					var duration_of_agreement = ((model.max_age - age) < 0) ? 20 : (model.max_age - age);
 					var out = _Utils_update(
 						client_1,
 						{age: age, birth_year: birth_year});
+					var youngest_age = A3($author$project$Main$getYoungestAge, model.client_2_exists, age, model.client_2.age);
+					var duration_of_agreement = ((model.max_age - youngest_age) < 0) ? 20 : (model.max_age - youngest_age);
+					var end_of_plan = A3($author$project$Main$calculateEndOfPlan, model.current_year, model.max_age, youngest_age);
 					var $temp$msg = $author$project$Main$Calculate,
 						$temp$model = _Utils_update(
 						model,
@@ -12039,16 +12082,13 @@ var $author$project$Main$update = F2(
 						$elm$core$Maybe$withDefault,
 						2020 - 65,
 						$elm$core$String$toInt(n));
-					var youngest_age = A2(
-						$elm$core$Basics$min,
-						birth_year,
-						$author$project$Main$getYoungestAge(model));
-					var end_of_plan = A3($author$project$Main$calculateEndOfPlan, model.current_year, model.max_age, youngest_age);
 					var age = ((model.current_year - birth_year) < 0) ? 65 : (model.current_year - birth_year);
-					var duration_of_agreement = ((model.max_age - age) < 0) ? 20 : (model.max_age - age);
 					var out = _Utils_update(
 						client_2,
 						{age: age, birth_year: birth_year});
+					var youngest_age = A3($author$project$Main$getYoungestAge, model.client_2_exists, model.client_1.age, age);
+					var duration_of_agreement = ((model.max_age - youngest_age) < 0) ? 20 : (model.max_age - youngest_age);
+					var end_of_plan = A3($author$project$Main$calculateEndOfPlan, model.current_year, model.max_age, youngest_age);
 					var $temp$msg = $author$project$Main$Calculate,
 						$temp$model = _Utils_update(
 						model,
@@ -12065,7 +12105,7 @@ var $author$project$Main$update = F2(
 					var found = A3(
 						$elm$core$Dict$insert,
 						model.other_monthly_income_counter,
-						{end_year_after_retirement: model.current_year - model.duration_of_agreement, end_year_after_retirement_input: '', error: $author$project$Main$noError, growth_rate: 0.0, growth_rate_input: '0%', id: model.other_monthly_income_counter, name: '', start_year_after_retirement: 0, start_year_after_retirement_input: '', starting_monthly_income: 0.0, starting_monthly_income_input: '0'},
+						{end_year_after_retirement: model.current_year - model.duration_of_agreement, end_year_after_retirement_input: '', error: $author$project$Main$noError, growth_rate: 0.0, growth_rate_input: '0%', id: model.other_monthly_income_counter, name: '', start_year_after_retirement: 0, start_year_after_retirement_input: '', starting_monthly_income: 0.0, starting_monthly_income_input: ''},
 						model.other_monthly_incomes);
 					var $temp$msg = $author$project$Main$Calculate,
 						$temp$model = _Utils_update(
@@ -12090,7 +12130,7 @@ var $author$project$Main$update = F2(
 					continue update;
 				case 'Now':
 					var n = msg.a;
-					var youngest_age = $author$project$Main$getYoungestAge(model);
+					var youngest_age = A3($author$project$Main$getYoungestAge, model.client_2_exists, model.client_1.age, model.client_2.age);
 					var current_year = A2($elm$time$Time$toYear, $elm$time$Time$utc, n);
 					var end_of_plan = A3($author$project$Main$calculateEndOfPlan, current_year, model.max_age, youngest_age);
 					var max_year = current_year + 119;
@@ -12146,6 +12186,31 @@ var $author$project$Main$update = F2(
 					msg = $temp$msg;
 					model = $temp$model;
 					continue update;
+				case 'ToggleAnsweredDateOfBirth':
+					var quiz_from_model = model.quiz;
+					var quiz = _Utils_update(
+						quiz_from_model,
+						{date_of_birth: !model.quiz.date_of_birth});
+					var $temp$msg = $author$project$Main$Calculate,
+						$temp$model = _Utils_update(
+						model,
+						{quiz: quiz});
+					msg = $temp$msg;
+					model = $temp$model;
+					continue update;
+				case 'ToggleFactorInOtherIncome':
+					var s = msg.a;
+					var quiz_from_model = model.quiz;
+					var quiz = _Utils_update(
+						quiz_from_model,
+						{factor_in_other_income: !model.quiz.factor_in_other_income});
+					var $temp$msg = $author$project$Main$Calculate,
+						$temp$model = _Utils_update(
+						model,
+						{quiz: quiz});
+					msg = $temp$msg;
+					model = $temp$model;
+					continue update;
 				case 'ToggleFactorInSocialSecurity':
 					var s = msg.a;
 					var quiz_from_model = model.quiz;
@@ -12167,11 +12232,23 @@ var $author$project$Main$update = F2(
 					msg = $temp$msg;
 					model = $temp$model;
 					continue update;
+				case 'ToggleAnsweredFactorInSocialSec':
+					var quiz_from_model = model.quiz;
+					var quiz = _Utils_update(
+						quiz_from_model,
+						{answered_factor_in_social_sec: !model.quiz.answered_factor_in_social_sec});
+					var $temp$msg = $author$project$Main$Calculate,
+						$temp$model = _Utils_update(
+						model,
+						{quiz: quiz});
+					msg = $temp$msg;
+					model = $temp$model;
+					continue update;
 				case 'ToggleHasAnsweredNumPeople':
 					var quiz_from_model = model.quiz;
 					var quiz = _Utils_update(
 						quiz_from_model,
-						{answered_num_people: true});
+						{answered_num_people: !model.quiz.answered_num_people});
 					var $temp$msg = $author$project$Main$Calculate,
 						$temp$model = _Utils_update(
 						model,
@@ -12185,28 +12262,29 @@ var $author$project$Main$update = F2(
 							model,
 							{show_full_calculator: !model.show_full_calculator}),
 						$elm$core$Platform$Cmd$none);
-				case 'ToggleHasAnsweredDateOfBirth':
+				case 'PersonBirthdayAndSocialErrorCheck':
 					var client_1_estimate = msg.a;
 					var client_2_estimate = msg.b;
-					var t_client_2 = A2($author$project$Main$stringToFloatErrorTuple, client_2_estimate, $author$project$Main$buildSocialSecIncomeError);
-					var t_client_1 = A2($author$project$Main$stringToFloatErrorTuple, client_1_estimate, $author$project$Main$buildSocialSecIncomeError);
 					var quiz_from_model = model.quiz;
-					var client_2_monthly_income = t_client_2.a;
+					var client_2_clean_string = $author$project$Main$cleanString(client_2_estimate);
+					var t_client_2 = A2($author$project$Main$stringToFloatErrorTuple, client_2_clean_string, $author$project$Main$buildSocialSecIncomeError);
 					var client_2_error = t_client_2.b;
-					var client_1_monthly_income = t_client_1.a;
+					var client_2_monthly_income = t_client_2.a;
+					var client_1_clean_string = $author$project$Main$cleanString(client_1_estimate);
+					var t_client_1 = A2($author$project$Main$stringToFloatErrorTuple, client_1_clean_string, $author$project$Main$buildSocialSecIncomeError);
 					var client_1_error = t_client_1.b;
 					var cmd = model.client_2_exists ? (((!_Utils_eq(client_1_error.error_status, $author$project$Main$None)) && (!_Utils_eq(client_2_error.error_status, $author$project$Main$None))) ? $elm$core$Platform$Cmd$batch(
 						_List_fromArray(
 							[
 								A2(
 								$elm$core$Task$perform,
-								function (_v7) {
+								function (_v12) {
 									return $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient1(model.client_1.social_security_monthly_income_as_string);
 								},
 								$elm$core$Task$succeed(true)),
 								A2(
 								$elm$core$Task$perform,
-								function (_v8) {
+								function (_v13) {
 									return $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient2(model.client_2.social_security_monthly_income_as_string);
 								},
 								$elm$core$Task$succeed(true))
@@ -12215,7 +12293,7 @@ var $author$project$Main$update = F2(
 							[
 								A2(
 								$elm$core$Task$perform,
-								function (_v9) {
+								function (_v14) {
 									return $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient1(model.client_1.social_security_monthly_income_as_string);
 								},
 								$elm$core$Task$succeed(true))
@@ -12224,7 +12302,7 @@ var $author$project$Main$update = F2(
 							[
 								A2(
 								$elm$core$Task$perform,
-								function (_v10) {
+								function (_v15) {
 									return $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient2(model.client_2.social_security_monthly_income_as_string);
 								},
 								$elm$core$Task$succeed(true))
@@ -12233,7 +12311,7 @@ var $author$project$Main$update = F2(
 							[
 								A2(
 								$elm$core$Task$perform,
-								function (_v11) {
+								function (_v16) {
 									return $author$project$Main$NoOp;
 								},
 								$elm$core$Task$succeed(true))
@@ -12242,7 +12320,7 @@ var $author$project$Main$update = F2(
 							[
 								A2(
 								$elm$core$Task$perform,
-								function (_v12) {
+								function (_v17) {
 									return $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient1(model.client_1.social_security_monthly_income_as_string);
 								},
 								$elm$core$Task$succeed(true))
@@ -12251,7 +12329,7 @@ var $author$project$Main$update = F2(
 							[
 								A2(
 								$elm$core$Task$perform,
-								function (_v13) {
+								function (_v18) {
 									return $author$project$Main$NoOp;
 								},
 								$elm$core$Task$succeed(true))
@@ -12269,7 +12347,32 @@ var $author$project$Main$update = F2(
 							model,
 							{quiz: quiz}),
 						cmd);
+					var client_1_monthly_income = t_client_1.a;
 					return out;
+				case 'ToggleAnsweredFactorInOtherIncome':
+					var quiz_from_model = model.quiz;
+					var quiz = _Utils_update(
+						quiz_from_model,
+						{answered_factor_in_other_income: !model.quiz.answered_factor_in_other_income, other_income: true});
+					var $temp$msg = $author$project$Main$Calculate,
+						$temp$model = _Utils_update(
+						model,
+						{quiz: quiz});
+					msg = $temp$msg;
+					model = $temp$model;
+					continue update;
+				case 'HasAnsweredFactorInOtherIncome':
+					var quiz_from_model = model.quiz;
+					var quiz = _Utils_update(
+						quiz_from_model,
+						{answered_factor_in_other_income: true});
+					var $temp$msg = $author$project$Main$Calculate,
+						$temp$model = _Utils_update(
+						model,
+						{quiz: quiz});
+					msg = $temp$msg;
+					model = $temp$model;
+					continue update;
 				case 'HasAnsweredFactorInSocialSecurity':
 					var quiz_from_model = model.quiz;
 					var quiz = _Utils_update(
@@ -12311,7 +12414,12 @@ var $author$project$Main$update = F2(
 			}
 		}
 	});
+var $author$project$Main$HasAnsweredFactorInOtherIncome = {$: 'HasAnsweredFactorInOtherIncome'};
 var $author$project$Main$HasAnsweredFactorInSocialSecurity = {$: 'HasAnsweredFactorInSocialSecurity'};
+var $author$project$Main$ToggleAnsweredDateOfBirth = {$: 'ToggleAnsweredDateOfBirth'};
+var $author$project$Main$ToggleFactorInOtherIncome = function (a) {
+	return {$: 'ToggleFactorInOtherIncome', a: a};
+};
 var $author$project$Main$ToggleFactorInSocialSecurity = function (a) {
 	return {$: 'ToggleFactorInSocialSecurity', a: a};
 };
@@ -12371,6 +12479,7 @@ var $author$project$Main$formatIntAsDollarShowZero = function (i) {
 var $elm$html$Html$h3 = _VirtualDom_node('h3');
 var $author$project$Main$HasAnsweredOtherIncome = {$: 'HasAnsweredOtherIncome'};
 var $author$project$Main$InsertNewIncome = {$: 'InsertNewIncome'};
+var $author$project$Main$ToggleAnsweredFactorInOtherIncome = {$: 'ToggleAnsweredFactorInOtherIncome'};
 var $author$project$Main$DeleteIncome = function (a) {
 	return {$: 'DeleteIncome', a: a};
 };
@@ -12403,6 +12512,11 @@ var $author$project$Main$deleteOtherIncomeRowByName = function (into) {
 			$elm$json$Json$Decode$map,
 			into,
 			A2($elm$json$Json$Decode$field, 'name', $elm$json$Json$Decode$string)));
+};
+var $author$project$Main$formatStringAsDollar = function (s) {
+	var clean_string = $author$project$Main$cleanString(s);
+	var string_with_commas = A2($author$project$Main$addCommas, clean_string, _List_Nil);
+	return $elm$core$String$isEmpty(s) ? ('$' + '0') : ('$' + string_with_commas);
 };
 var $elm$html$Html$label = _VirtualDom_node('label');
 var $elm$html$Html$select = _VirtualDom_node('select');
@@ -12547,7 +12661,8 @@ var $author$project$Main$viewOtherIncomeRow = F2(
 													$author$project$Main$UpdateOtherMonthlyIncome(
 														$elm$core$String$fromInt(o.id))),
 													$elm$html$Html$Attributes$class('my-2 mx-2 bg-gray-100 text-center rounded w-40 h-10'),
-													$elm$html$Html$Attributes$value(o.starting_monthly_income_input)
+													$elm$html$Html$Attributes$value(
+													$author$project$Main$formatStringAsDollar(o.starting_monthly_income_input))
 												]),
 											_List_Nil)
 										]))
@@ -12720,15 +12835,35 @@ var $author$project$Main$viewOtherIncomeRow = F2(
 var $author$project$Main$viewOtherIncome = F2(
 	function (m, as_quiz) {
 		var quiz_btn = as_quiz ? A2(
-			$elm$html$Html$button,
+			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Events$onClick($author$project$Main$HasAnsweredOtherIncome),
-					$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
+					$elm$html$Html$Attributes$class('flex')
 				]),
 			_List_fromArray(
 				[
-					$elm$html$Html$text('Next')
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick($author$project$Main$ToggleAnsweredFactorInOtherIncome),
+							$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Back')
+						])),
+					A2(
+					$elm$html$Html$button,
+					_List_fromArray(
+						[
+							$elm$html$Html$Events$onClick($author$project$Main$HasAnsweredOtherIncome),
+							$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Next')
+						]))
 				])) : A2(
 			$elm$html$Html$div,
 			_List_fromArray(
@@ -12825,11 +12960,12 @@ var $author$project$Main$viewOtherIncome = F2(
 				[all_incomes, quiz_btn]));
 		return $elm$core$Dict$isEmpty(m.other_monthly_incomes) ? list_empty : list_not_empty;
 	});
-var $author$project$Main$ToggleClient2 = {$: 'ToggleClient2'};
-var $author$project$Main$ToggleHasAnsweredDateOfBirth = F2(
+var $author$project$Main$PersonBirthdayAndSocialErrorCheck = F2(
 	function (a, b) {
-		return {$: 'ToggleHasAnsweredDateOfBirth', a: a, b: b};
+		return {$: 'PersonBirthdayAndSocialErrorCheck', a: a, b: b};
 	});
+var $author$project$Main$ToggleClient2 = {$: 'ToggleClient2'};
+var $author$project$Main$ToggleGrossTargetIncome = {$: 'ToggleGrossTargetIncome'};
 var $author$project$Main$UpdateBirthYearClient1 = function (a) {
 	return {$: 'UpdateBirthYearClient1', a: a};
 };
@@ -12904,7 +13040,7 @@ var $author$project$Main$viewSocialSecurityInputs = F3(
 								]),
 							_List_fromArray(
 								[
-									$elm$html$Html$text('Starting Age:')
+									$elm$html$Html$text('At what age will you start to receive social security? :')
 								])),
 							A2(
 							$elm$html$Html$select,
@@ -13040,7 +13176,8 @@ var $author$project$Main$viewSocialSecurityInputs = F3(
 								[
 									$elm$html$Html$Events$onInput(update_social_monthly),
 									$elm$html$Html$Attributes$class('my-2 mx-2 bg-gray-100 w-1/4 text-center rounded'),
-									$elm$html$Html$Attributes$value(c.social_security_monthly_income_as_string)
+									$elm$html$Html$Attributes$value(
+									$author$project$Main$formatStringAsDollar(c.social_security_monthly_income_as_string))
 								]),
 							_List_Nil)
 						])),
@@ -13083,7 +13220,6 @@ var $author$project$Main$viewPersonDateOfBirth = F3(
 								]),
 							_List_fromArray(
 								[
-									$author$project$Main$viewError(m.target_gross_income_error),
 									A2(
 									$elm$html$Html$div,
 									_List_fromArray(
@@ -13291,7 +13427,7 @@ var $author$project$Main$viewPersonDateOfBirth = F3(
 													$author$project$Main$viewPossibleBirthYears(m))
 												]))
 										])),
-									factor_in_social_sec ? A3($author$project$Main$viewSocialSecurityInputs, m.client_1, $author$project$Main$UpdateSocialSecAgeClient1, $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient1) : A2(
+									(factor_in_social_sec || (!as_quiz)) ? A3($author$project$Main$viewSocialSecurityInputs, m.client_1, $author$project$Main$UpdateSocialSecAgeClient1, $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient1) : A2(
 									$elm$html$Html$div,
 									_List_fromArray(
 										[
@@ -13556,6 +13692,13 @@ var $author$project$Main$viewPersonDateOfBirth = F3(
 					$elm$html$Html$div,
 					_List_fromArray(
 						[
+							$elm$html$Html$Attributes$class('hidden')
+						]),
+					_List_Nil),
+					((!as_quiz) && (!m.client_2_exists)) ? A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
 							$elm$html$Html$Attributes$class('flex flex-col justify-center items-center'),
 							$elm$html$Html$Events$onClick($author$project$Main$ToggleClient2)
 						]),
@@ -13652,21 +13795,47 @@ var $author$project$Main$viewPersonDateOfBirth = F3(
 								[
 									$elm$html$Html$text('Click to add another person')
 								]))
-						])),
-					as_quiz ? A2(
-					$elm$html$Html$button,
+						])) : A2(
+					$elm$html$Html$div,
 					_List_fromArray(
 						[
-							$elm$html$Html$Events$onClick(
-							A2(
-								$author$project$Main$ToggleHasAnsweredDateOfBirth,
-								m.client_1.social_security_monthly_income_as_string,
-								m.client_2_exists ? m.client_2.social_security_monthly_income_as_string : '1')),
-							$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
+							$elm$html$Html$Attributes$class('hidden')
+						]),
+					_List_Nil),
+					as_quiz ? A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('flex')
 						]),
 					_List_fromArray(
 						[
-							$elm$html$Html$text('Next')
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick($author$project$Main$ToggleGrossTargetIncome),
+									$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Back')
+								])),
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick(
+									A2(
+										$author$project$Main$PersonBirthdayAndSocialErrorCheck,
+										m.client_1.social_security_monthly_income_as_string,
+										m.client_2_exists ? m.client_2.social_security_monthly_income_as_string : '1')),
+									$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Next')
+								]))
 						])) : A2(
 					$elm$html$Html$div,
 					_List_fromArray(
@@ -13996,7 +14165,7 @@ var $author$project$Main$createTableDataFrom = F3(
 						var income_tax = gross_income * m.tax_rate;
 						var net_annual_income = gross_income - income_tax;
 						var net_income_val = gross_income - income_tax;
-						var net_monthly_income = gross_income - (income_tax / 12);
+						var net_monthly_income = (gross_income - income_tax) / 12;
 						var total_income_from_assets = income_greater_than_target ? 0.0 : ((gross_income - other_monthly_annual_income) - social_security_annual_income);
 						var bucket_row = A2($author$project$Main$getBucketValsByRow, i, buckets);
 						var risk_bucket_val = A2($author$project$Main$getIncomeValOrZero, bucket_row, 5);
@@ -14266,6 +14435,7 @@ var $author$project$Main$viewTable = function (m) {
 				A3($author$project$Main$createTableDataFrom, m, m.buckets, m.income_from_assets))
 			]));
 };
+var $author$project$Main$ToggleAnsweredFactorInSocialSec = {$: 'ToggleAnsweredFactorInSocialSec'};
 var $author$project$Main$UpdateStartingIncome = function (a) {
 	return {$: 'UpdateStartingIncome', a: a};
 };
@@ -14303,22 +14473,43 @@ var $author$project$Main$viewTargetGrossIncome = F2(
 								[
 									$elm$html$Html$Events$onInput($author$project$Main$UpdateStartingIncome),
 									$elm$html$Html$Attributes$class('my-2 mx-0 bg-gray-100 w-full text-center rounded'),
-									$elm$html$Html$Attributes$value(m.target_gross_income_as_string)
+									$elm$html$Html$Attributes$value(
+									$author$project$Main$formatStringAsDollar(m.target_gross_income_as_string))
 								]),
 							_List_Nil)
 						])),
 					$author$project$Main$viewError(m.target_gross_income_error),
 					as_quiz ? A2(
-					$elm$html$Html$button,
+					$elm$html$Html$div,
 					_List_fromArray(
 						[
-							$elm$html$Html$Events$onClick(
-							$author$project$Main$UpdateStartingIncomeAsQuiz(m.target_gross_income_as_string)),
-							$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
+							$elm$html$Html$Attributes$class('flex')
 						]),
 					_List_fromArray(
 						[
-							$elm$html$Html$text('Next')
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick($author$project$Main$ToggleAnsweredFactorInSocialSec),
+									$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Back')
+								])),
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick(
+									$author$project$Main$UpdateStartingIncomeAsQuiz(m.target_gross_income_as_string)),
+									$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Next')
+								]))
 						])) : A2(
 					$elm$html$Html$div,
 					_List_fromArray(
@@ -14505,17 +14696,150 @@ var $author$project$Main$viewQuiz = function (model) {
 							]))
 					])),
 				A2(
-				$elm$html$Html$button,
+				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						$elm$html$Html$Events$onClick($author$project$Main$HasAnsweredFactorInSocialSecurity),
-						$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
+						$elm$html$Html$Attributes$class('flex')
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text('Next')
+						A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick($author$project$Main$ToggleHasAnsweredNumPeople),
+								$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Back')
+							])),
+						A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick($author$project$Main$HasAnsweredFactorInSocialSecurity),
+								$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Next')
+							]))
 					]))
-			])) : ((!model.quiz.gross_target_income) ? A2($author$project$Main$viewTargetGrossIncome, model, true) : ((!model.quiz.date_of_birth) ? A3($author$project$Main$viewPersonDateOfBirth, model, true, model.quiz.factor_in_social_sec) : ((!model.quiz.other_income) ? A2($author$project$Main$viewOtherIncome, model, true) : A2(
+			])) : ((!model.quiz.gross_target_income) ? A2($author$project$Main$viewTargetGrossIncome, model, true) : ((!model.quiz.date_of_birth) ? A3($author$project$Main$viewPersonDateOfBirth, model, true, model.quiz.factor_in_social_sec) : ((!model.quiz.answered_factor_in_other_income) ? A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-center items-center bg-gray-500 md:mx-auto mx-8 my-3 rounded-lg')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$h3,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('text-xl text-white text-center font-bold')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('Do you have any other income streams?')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('flex flex-row')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$input,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$type_('radio'),
+										$elm$html$Html$Attributes$value('true'),
+										$elm$html$Html$Attributes$checked(model.quiz.factor_in_other_income),
+										$elm$html$Html$Events$onInput($author$project$Main$ToggleFactorInOtherIncome)
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('mx-2 text-white font-bold')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Yes')
+									]))
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('flex flex-row')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$input,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$type_('radio'),
+										$elm$html$Html$Attributes$value('false'),
+										$elm$html$Html$Attributes$checked(!model.quiz.factor_in_other_income),
+										$elm$html$Html$Events$onInput($author$project$Main$ToggleFactorInOtherIncome)
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('mx-2 text-white font-bold')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('No')
+									]))
+							]))
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('flex')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick($author$project$Main$ToggleAnsweredDateOfBirth),
+								$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Back')
+							])),
+						A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick($author$project$Main$HasAnsweredFactorInOtherIncome),
+								$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Next')
+							]))
+					]))
+			])) : (((!model.quiz.other_income) && model.quiz.factor_in_other_income) ? A2($author$project$Main$viewOtherIncome, model, true) : A2(
 		$elm$html$Html$div,
 		_List_Nil,
 		_List_fromArray(
@@ -14649,7 +14973,7 @@ var $author$project$Main$viewQuiz = function (model) {
 					]),
 				_List_Nil),
 				$author$project$Main$viewTable(model)
-			]))))));
+			])))))));
 };
 var $author$project$Main$view = function (model) {
 	return A2(
@@ -14663,4 +14987,4 @@ var $author$project$Main$view = function (model) {
 var $author$project$Main$main = $elm$browser$Browser$element(
 	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{},"unions":{"Main.Msg":{"args":[],"tags":{"Calculate":[],"InsertNewIncome":[],"DeleteIncome":["String.String"],"UpdateStartingIncome":["String.String"],"UpdateStartingIncomeAsQuiz":["String.String"],"UpdateSocialSecAgeClient1":["String.String"],"UpdateSocialSecAgeClient2":["String.String"],"UpdateSocialSecurityMontlhlyIncomeClient1":["String.String"],"UpdateSocialSecurityMontlhlyIncomeClient2":["String.String"],"UpdateOtherIncomeName":["String.String","String.String"],"UpdateOtherMonthlyIncome":["String.String","String.String"],"UpdateStartYear":["String.String","String.String"],"UpdateEndYear":["String.String","String.String"],"UpdateAnnualGrowthPercentage":["String.String","String.String"],"UpdateSocialSecurityStartMonthClient1":["String.String"],"UpdateSocialSecurityStartMonthClient2":["String.String"],"UpdateBirthYearClient1":["String.String"],"UpdateBirthYearClient2":["String.String"],"Now":["Time.Posix"],"ToggleClient2":[],"TogglePlanType":["String.String"],"ToggleNumberOfPeopleOnPlan":["String.String"],"ToggleFactorInSocialSecurity":["String.String"],"ToggleHasAnsweredNumPeople":[],"ToggleHasAnsweredDateOfBirth":["String.String","String.String"],"HasAnsweredOtherIncome":[],"HasAnsweredFactorInSocialSecurity":[],"ToggleFullCalculator":[],"NoOp":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"String.String":{"args":[],"tags":{"String":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}}}}})}});}(this));
+	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{},"unions":{"Main.Msg":{"args":[],"tags":{"Calculate":[],"InsertNewIncome":[],"DeleteIncome":["String.String"],"UpdateStartingIncome":["String.String"],"UpdateStartingIncomeAsQuiz":["String.String"],"UpdateSocialSecAgeClient1":["String.String"],"UpdateSocialSecAgeClient2":["String.String"],"UpdateSocialSecurityMontlhlyIncomeClient1":["String.String"],"UpdateSocialSecurityMontlhlyIncomeClient2":["String.String"],"UpdateOtherIncomeName":["String.String","String.String"],"UpdateOtherMonthlyIncome":["String.String","String.String"],"UpdateStartYear":["String.String","String.String"],"UpdateEndYear":["String.String","String.String"],"UpdateAnnualGrowthPercentage":["String.String","String.String"],"UpdateSocialSecurityStartMonthClient1":["String.String"],"UpdateSocialSecurityStartMonthClient2":["String.String"],"UpdateBirthYearClient1":["String.String"],"UpdateBirthYearClient2":["String.String"],"Now":["Time.Posix"],"ToggleClient2":[],"TogglePlanType":["String.String"],"ToggleNumberOfPeopleOnPlan":["String.String"],"ToggleFactorInSocialSecurity":["String.String"],"ToggleFactorInOtherIncome":["String.String"],"ToggleHasAnsweredNumPeople":[],"PersonBirthdayAndSocialErrorCheck":["String.String","String.String"],"ToggleAnsweredDateOfBirth":[],"HasAnsweredOtherIncome":[],"HasAnsweredFactorInSocialSecurity":[],"ToggleAnsweredFactorInSocialSec":[],"HasAnsweredFactorInOtherIncome":[],"ToggleFullCalculator":[],"NoOp":[],"ToggleGrossTargetIncome":[],"ToggleAnsweredFactorInOtherIncome":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"String.String":{"args":[],"tags":{"String":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}}}}})}});}(this));

@@ -10810,7 +10810,7 @@ var $author$project$Main$init = function (_v0) {
 			possible_birth_years: A2($elm$core$List$range, current_year - max_age, current_year),
 			possible_end_years: A2($elm$core$List$range, current_year - 1, end_of_plan),
 			possible_start_years: A2($elm$core$List$range, current_year, end_of_plan - 1),
-			quiz: {answered_factor_in_other_income: false, answered_factor_in_social_sec: false, answered_num_people: false, date_of_birth: false, factor_in_other_income: false, factor_in_social_sec: true, gross_target_income: false, other_income: false, plan_for_1_person_is_selected: true, plan_for_2_people_is_selected: false, social_sec_estimate: false},
+			quiz: {answered_factor_in_other_income: false, answered_factor_in_social_sec: false, answered_num_people: false, date_of_birth: false, factor_in_other_income: false, factor_in_social_sec: false, gross_target_income: false, has_answered_all_quiz: false, num_questions_answered: 0, other_income: false, plan_for_1_person_is_selected: true, plan_for_2_people_is_selected: false, social_sec_estimate: true},
 			required_starting_assets: 0,
 			show_full_calculator: false,
 			social_security_growth_rate: 0.005,
@@ -11725,9 +11725,10 @@ var $author$project$Main$update = F2(
 					continue update;
 				case 'ToggleGrossTargetIncome':
 					var quiz_from_model = model.quiz;
+					var num_questions_answered = model.quiz.gross_target_income ? (model.quiz.num_questions_answered - 1) : (model.quiz.num_questions_answered + 1);
 					var quiz = _Utils_update(
 						quiz_from_model,
-						{gross_target_income: !model.quiz.gross_target_income});
+						{gross_target_income: !model.quiz.gross_target_income, num_questions_answered: num_questions_answered});
 					var $temp$msg = $author$project$Main$Calculate,
 						$temp$model = _Utils_update(
 						model,
@@ -11744,7 +11745,7 @@ var $author$project$Main$update = F2(
 					var error = t.b;
 					var quiz = _Utils_eq(error.error_status, $author$project$Main$None) ? _Utils_update(
 						quiz_from_model,
-						{gross_target_income: true}) : quiz_from_model;
+						{gross_target_income: true, num_questions_answered: model.quiz.num_questions_answered + 1}) : quiz_from_model;
 					var $temp$msg = $author$project$Main$Calculate,
 						$temp$model = _Utils_update(
 						model,
@@ -12188,9 +12189,10 @@ var $author$project$Main$update = F2(
 					continue update;
 				case 'ToggleAnsweredDateOfBirth':
 					var quiz_from_model = model.quiz;
+					var num_questions_answered = model.quiz.date_of_birth ? (model.quiz.num_questions_answered - 1) : (model.quiz.num_questions_answered + 1);
 					var quiz = _Utils_update(
 						quiz_from_model,
-						{date_of_birth: !model.quiz.date_of_birth});
+						{date_of_birth: !model.quiz.date_of_birth, num_questions_answered: num_questions_answered});
 					var $temp$msg = $author$project$Main$Calculate,
 						$temp$model = _Utils_update(
 						model,
@@ -12234,9 +12236,10 @@ var $author$project$Main$update = F2(
 					continue update;
 				case 'ToggleAnsweredFactorInSocialSec':
 					var quiz_from_model = model.quiz;
+					var num_questions_answered = model.quiz.answered_factor_in_social_sec ? (model.quiz.num_questions_answered - 1) : (model.quiz.num_questions_answered + 1);
 					var quiz = _Utils_update(
 						quiz_from_model,
-						{answered_factor_in_social_sec: !model.quiz.answered_factor_in_social_sec});
+						{answered_factor_in_social_sec: !model.quiz.answered_factor_in_social_sec, num_questions_answered: num_questions_answered});
 					var $temp$msg = $author$project$Main$Calculate,
 						$temp$model = _Utils_update(
 						model,
@@ -12246,9 +12249,12 @@ var $author$project$Main$update = F2(
 					continue update;
 				case 'ToggleHasAnsweredNumPeople':
 					var quiz_from_model = model.quiz;
+					var num_questions_answered = model.quiz.answered_num_people ? (model.quiz.num_questions_answered - 1) : (model.quiz.num_questions_answered + 1);
 					var quiz = _Utils_update(
 						quiz_from_model,
-						{answered_num_people: !model.quiz.answered_num_people});
+						{answered_num_people: !model.quiz.answered_num_people, num_questions_answered: num_questions_answered});
+					var _v12 = A2($elm$core$Debug$log, 'has answered in', model.quiz.answered_num_people);
+					var _v13 = A2($elm$core$Debug$log, 'num questions answered', model.quiz.num_questions_answered);
 					var $temp$msg = $author$project$Main$Calculate,
 						$temp$model = _Utils_update(
 						model,
@@ -12278,13 +12284,13 @@ var $author$project$Main$update = F2(
 							[
 								A2(
 								$elm$core$Task$perform,
-								function (_v12) {
+								function (_v14) {
 									return $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient1(model.client_1.social_security_monthly_income_as_string);
 								},
 								$elm$core$Task$succeed(true)),
 								A2(
 								$elm$core$Task$perform,
-								function (_v13) {
+								function (_v15) {
 									return $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient2(model.client_2.social_security_monthly_income_as_string);
 								},
 								$elm$core$Task$succeed(true))
@@ -12293,7 +12299,7 @@ var $author$project$Main$update = F2(
 							[
 								A2(
 								$elm$core$Task$perform,
-								function (_v14) {
+								function (_v16) {
 									return $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient1(model.client_1.social_security_monthly_income_as_string);
 								},
 								$elm$core$Task$succeed(true))
@@ -12302,26 +12308,8 @@ var $author$project$Main$update = F2(
 							[
 								A2(
 								$elm$core$Task$perform,
-								function (_v15) {
-									return $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient2(model.client_2.social_security_monthly_income_as_string);
-								},
-								$elm$core$Task$succeed(true))
-							])) : $elm$core$Platform$Cmd$batch(
-						_List_fromArray(
-							[
-								A2(
-								$elm$core$Task$perform,
-								function (_v16) {
-									return $author$project$Main$NoOp;
-								},
-								$elm$core$Task$succeed(true))
-							]))))) : ((!_Utils_eq(client_1_error.error_status, $author$project$Main$None)) ? $elm$core$Platform$Cmd$batch(
-						_List_fromArray(
-							[
-								A2(
-								$elm$core$Task$perform,
 								function (_v17) {
-									return $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient1(model.client_1.social_security_monthly_income_as_string);
+									return $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient2(model.client_2.social_security_monthly_income_as_string);
 								},
 								$elm$core$Task$succeed(true))
 							])) : $elm$core$Platform$Cmd$batch(
@@ -12333,11 +12321,30 @@ var $author$project$Main$update = F2(
 									return $author$project$Main$NoOp;
 								},
 								$elm$core$Task$succeed(true))
+							]))))) : ((!_Utils_eq(client_1_error.error_status, $author$project$Main$None)) ? $elm$core$Platform$Cmd$batch(
+						_List_fromArray(
+							[
+								A2(
+								$elm$core$Task$perform,
+								function (_v19) {
+									return $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient1(model.client_1.social_security_monthly_income_as_string);
+								},
+								$elm$core$Task$succeed(true))
+							])) : $elm$core$Platform$Cmd$batch(
+						_List_fromArray(
+							[
+								A2(
+								$elm$core$Task$perform,
+								function (_v20) {
+									return $author$project$Main$NoOp;
+								},
+								$elm$core$Task$succeed(true))
 							])));
 					var has_no_errors = model.quiz.factor_in_social_sec ? (model.client_2_exists ? (_Utils_eq(client_1_error.error_status, $author$project$Main$None) && _Utils_eq(client_2_error.error_status, $author$project$Main$None)) : _Utils_eq(client_1_error.error_status, $author$project$Main$None)) : true;
+					var num_questions_answered = has_no_errors ? (model.quiz.num_questions_answered + 1) : model.quiz.num_questions_answered;
 					var quiz = _Utils_update(
 						quiz_from_model,
-						{date_of_birth: has_no_errors});
+						{date_of_birth: has_no_errors, num_questions_answered: num_questions_answered});
 					var out = (!model.quiz.factor_in_social_sec) ? _Utils_Tuple2(
 						_Utils_update(
 							model,
@@ -12363,9 +12370,10 @@ var $author$project$Main$update = F2(
 					continue update;
 				case 'HasAnsweredFactorInOtherIncome':
 					var quiz_from_model = model.quiz;
+					var has_answered_all_quiz = (!model.quiz.factor_in_other_income) ? true : false;
 					var quiz = _Utils_update(
 						quiz_from_model,
-						{answered_factor_in_other_income: true});
+						{answered_factor_in_other_income: true, has_answered_all_quiz: has_answered_all_quiz});
 					var $temp$msg = $author$project$Main$Calculate,
 						$temp$model = _Utils_update(
 						model,
@@ -12377,7 +12385,7 @@ var $author$project$Main$update = F2(
 					var quiz_from_model = model.quiz;
 					var quiz = _Utils_update(
 						quiz_from_model,
-						{answered_factor_in_social_sec: true});
+						{answered_factor_in_social_sec: true, num_questions_answered: model.quiz.num_questions_answered + 1});
 					var $temp$msg = $author$project$Main$Calculate,
 						$temp$model = _Utils_update(
 						model,
@@ -12399,9 +12407,10 @@ var $author$project$Main$update = F2(
 									return _Utils_eq(v.error.error_status, $author$project$Main$None);
 								},
 								$elm$core$Dict$values(model.other_monthly_incomes))));
+					var num_questions_answered = has_no_errors ? (model.quiz.num_questions_answered + 1) : model.quiz.num_questions_answered;
 					var quiz = _Utils_update(
 						quiz_from_model,
-						{other_income: has_no_errors});
+						{num_questions_answered: num_questions_answered, other_income: has_no_errors});
 					var $temp$msg = $author$project$Main$Calculate,
 						$temp$model = _Utils_update(
 						model,
@@ -12415,19 +12424,11 @@ var $author$project$Main$update = F2(
 		}
 	});
 var $author$project$Main$HasAnsweredFactorInOtherIncome = {$: 'HasAnsweredFactorInOtherIncome'};
-var $author$project$Main$HasAnsweredFactorInSocialSecurity = {$: 'HasAnsweredFactorInSocialSecurity'};
 var $author$project$Main$ToggleAnsweredDateOfBirth = {$: 'ToggleAnsweredDateOfBirth'};
 var $author$project$Main$ToggleFactorInOtherIncome = function (a) {
 	return {$: 'ToggleFactorInOtherIncome', a: a};
 };
-var $author$project$Main$ToggleFactorInSocialSecurity = function (a) {
-	return {$: 'ToggleFactorInSocialSecurity', a: a};
-};
 var $author$project$Main$ToggleFullCalculator = {$: 'ToggleFullCalculator'};
-var $author$project$Main$ToggleHasAnsweredNumPeople = {$: 'ToggleHasAnsweredNumPeople'};
-var $author$project$Main$ToggleNumberOfPeopleOnPlan = function (a) {
-	return {$: 'ToggleNumberOfPeopleOnPlan', a: a};
-};
 var $elm$json$Json$Encode$bool = _Json_wrap;
 var $elm$html$Html$Attributes$boolProperty = F2(
 	function (key, bool) {
@@ -12477,6 +12478,279 @@ var $author$project$Main$formatIntAsDollarShowZero = function (i) {
 	return '$' + string_with_commas;
 };
 var $elm$html$Html$h3 = _VirtualDom_node('h3');
+var $author$project$Main$HasAnsweredFactorInSocialSecurity = {$: 'HasAnsweredFactorInSocialSecurity'};
+var $author$project$Main$ToggleFactorInSocialSecurity = function (a) {
+	return {$: 'ToggleFactorInSocialSecurity', a: a};
+};
+var $author$project$Main$ToggleGrossTargetIncome = {$: 'ToggleGrossTargetIncome'};
+var $author$project$Main$viewFactorInSocialSec = F2(
+	function (model, as_quiz) {
+		var attr = as_quiz ? _List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'min-height', '75vh'),
+				A2($elm$html$Html$Attributes$style, 'max-height', '75vh'),
+				$elm$html$Html$Attributes$class('flex items-center')
+			]) : _List_Nil;
+		return A2(
+			$elm$html$Html$div,
+			attr,
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-around items-center bg-white md:mx-auto mx-8 my-3 '),
+							as_quiz ? A2($elm$html$Html$Attributes$style, 'min-height', '33vh') : A2($elm$html$Html$Attributes$style, 'none', 'none')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$h3,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('text-xl text-center font-bold')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Do you want to factor in social security?')
+								])),
+							A2(
+							$elm$html$Html$div,
+							_List_Nil,
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$div,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('flex flex-row')
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$input,
+											_List_fromArray(
+												[
+													$elm$html$Html$Attributes$type_('radio'),
+													$elm$html$Html$Attributes$value('true'),
+													$elm$html$Html$Attributes$checked(model.quiz.factor_in_social_sec),
+													$elm$html$Html$Events$onInput($author$project$Main$ToggleFactorInSocialSecurity)
+												]),
+											_List_Nil),
+											A2(
+											$elm$html$Html$div,
+											_List_fromArray(
+												[
+													$elm$html$Html$Attributes$class('mx-2 font-bold')
+												]),
+											_List_fromArray(
+												[
+													$elm$html$Html$text('Yes')
+												]))
+										])),
+									A2(
+									$elm$html$Html$div,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('flex flex-row')
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$input,
+											_List_fromArray(
+												[
+													$elm$html$Html$Attributes$type_('radio'),
+													$elm$html$Html$Attributes$value('false'),
+													$elm$html$Html$Attributes$checked(!model.quiz.factor_in_social_sec),
+													$elm$html$Html$Events$onInput($author$project$Main$ToggleFactorInSocialSecurity)
+												]),
+											_List_Nil),
+											A2(
+											$elm$html$Html$div,
+											_List_fromArray(
+												[
+													$elm$html$Html$Attributes$class('mx-2 font-bold')
+												]),
+											_List_fromArray(
+												[
+													$elm$html$Html$text('No')
+												]))
+										]))
+								])),
+							as_quiz ? A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('w-full flex justify-center pt-6'),
+									A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #333333')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$button,
+									_List_fromArray(
+										[
+											$elm$html$Html$Events$onClick($author$project$Main$ToggleGrossTargetIncome),
+											$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
+											A2($elm$html$Html$Attributes$style, 'background-color', '#333333')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Back')
+										])),
+									A2(
+									$elm$html$Html$button,
+									_List_fromArray(
+										[
+											$elm$html$Html$Events$onClick($author$project$Main$HasAnsweredFactorInSocialSecurity),
+											$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
+											A2($elm$html$Html$Attributes$style, 'background-color', '#7F6126')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Next')
+										]))
+								])) : A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('hidden')
+								]),
+							_List_Nil)
+						]))
+				]));
+	});
+var $author$project$Main$ToggleHasAnsweredNumPeople = {$: 'ToggleHasAnsweredNumPeople'};
+var $author$project$Main$ToggleNumberOfPeopleOnPlan = function (a) {
+	return {$: 'ToggleNumberOfPeopleOnPlan', a: a};
+};
+var $author$project$Main$viewNumberOfPeople = F2(
+	function (model, as_quiz) {
+		var num_people = A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-around items-center md:mx-auto mx-8 my-3 bg-white'),
+					as_quiz ? A2($elm$html$Html$Attributes$style, 'min-height', '33vh') : A2($elm$html$Html$Attributes$style, 'none', 'none')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$h3,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('text-xl text-center font-bold')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('How many people will be on your plan?')
+						])),
+					A2(
+					$elm$html$Html$div,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('flex flex-row')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$input,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$type_('radio'),
+											$elm$html$Html$Attributes$value('1'),
+											$elm$html$Html$Attributes$checked(model.quiz.plan_for_1_person_is_selected),
+											$elm$html$Html$Events$onInput($author$project$Main$ToggleNumberOfPeopleOnPlan)
+										]),
+									_List_Nil),
+									A2(
+									$elm$html$Html$div,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('mx-2 font-bold')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('1')
+										]))
+								])),
+							A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('flex flex-row')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$input,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$type_('radio'),
+											$elm$html$Html$Attributes$value('2'),
+											$elm$html$Html$Attributes$checked(model.quiz.plan_for_2_people_is_selected),
+											$elm$html$Html$Events$onInput($author$project$Main$ToggleNumberOfPeopleOnPlan)
+										]),
+									_List_Nil),
+									A2(
+									$elm$html$Html$div,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('mx-2 font-bold')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('2')
+										]))
+								]))
+						])),
+					as_quiz ? A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('w-full flex justify-center pt-6'),
+							A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #333333')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick($author$project$Main$ToggleHasAnsweredNumPeople),
+									$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
+									A2($elm$html$Html$Attributes$style, 'background-color', '#7F6126')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Next')
+								]))
+						])) : A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('hidden')
+						]),
+					_List_Nil)
+				]));
+		return as_quiz ? A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					A2($elm$html$Html$Attributes$style, 'min-height', '75vh'),
+					A2($elm$html$Html$Attributes$style, 'max-height', '75vh'),
+					$elm$html$Html$Attributes$class('flex items-center')
+				]),
+			_List_fromArray(
+				[num_people])) : num_people;
+	});
 var $author$project$Main$HasAnsweredOtherIncome = {$: 'HasAnsweredOtherIncome'};
 var $author$project$Main$InsertNewIncome = {$: 'InsertNewIncome'};
 var $author$project$Main$ToggleAnsweredFactorInOtherIncome = {$: 'ToggleAnsweredFactorInOtherIncome'};
@@ -12584,8 +12858,10 @@ var $author$project$Main$viewOtherIncomeRow = F2(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('rounded m-2 p-1 bg-gray-600 w-full flex flex-col '),
-					A2($elm$html$Html$Attributes$attribute, 'name', 'top_div')
+					$elm$html$Html$Attributes$class('w-full my-1'),
+					A2($elm$html$Html$Attributes$attribute, 'name', 'top_div'),
+					A2($elm$html$Html$Attributes$style, 'background-color', 'rgba(26,76,49,0.4)'),
+					A2($elm$html$Html$Attributes$style, 'border', '1px solid #1A4C31')
 				]),
 			_List_fromArray(
 				[
@@ -12593,7 +12869,7 @@ var $author$project$Main$viewOtherIncomeRow = F2(
 					$elm$html$Html$div,
 					_List_fromArray(
 						[
-							$elm$html$Html$Attributes$class('flex flex-col justify-center items-center')
+							$elm$html$Html$Attributes$class('flex')
 						]),
 					_List_fromArray(
 						[
@@ -12601,183 +12877,158 @@ var $author$project$Main$viewOtherIncomeRow = F2(
 							$elm$html$Html$div,
 							_List_fromArray(
 								[
-									$elm$html$Html$Attributes$class('flex')
+									$elm$html$Html$Attributes$class('flex-1 text-center p-2')
 								]),
 							_List_fromArray(
 								[
 									A2(
-									$elm$html$Html$div,
+									$elm$html$Html$label,
 									_List_fromArray(
 										[
-											$elm$html$Html$Attributes$class('flex flex-col justify-center')
+											$elm$html$Html$Attributes$class('font-bold text-center text-sm')
 										]),
 									_List_fromArray(
 										[
-											A2(
-											$elm$html$Html$label,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$class('font-bold text-center text-white')
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('Source of Income')
-												])),
-											A2(
-											$elm$html$Html$input,
-											_List_fromArray(
-												[
-													$elm$html$Html$Events$onInput(
-													$author$project$Main$UpdateOtherIncomeName(
-														$elm$core$String$fromInt(o.id))),
-													$elm$html$Html$Attributes$class('rounded py-2 px-3 m-2 bg-gray-100 w-40'),
-													$elm$html$Html$Attributes$value(o.name)
-												]),
-											_List_Nil)
+											$elm$html$Html$text('Name')
 										])),
 									A2(
-									$elm$html$Html$div,
+									$elm$html$Html$input,
 									_List_fromArray(
 										[
-											$elm$html$Html$Attributes$class('flex flex-col justify-center w-full')
+											$elm$html$Html$Events$onInput(
+											$author$project$Main$UpdateOtherIncomeName(
+												$elm$core$String$fromInt(o.id))),
+											$elm$html$Html$Attributes$class('bg-gray-100 w-full text-center h-6'),
+											$elm$html$Html$Attributes$value(o.name)
 										]),
-									_List_fromArray(
-										[
-											A2(
-											$elm$html$Html$label,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$class('font-bold text-center text-white')
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('Monthly Income')
-												])),
-											A2(
-											$elm$html$Html$input,
-											_List_fromArray(
-												[
-													$elm$html$Html$Events$onInput(
-													$author$project$Main$UpdateOtherMonthlyIncome(
-														$elm$core$String$fromInt(o.id))),
-													$elm$html$Html$Attributes$class('my-2 mx-2 bg-gray-100 text-center rounded w-40 h-10'),
-													$elm$html$Html$Attributes$value(
-													$author$project$Main$formatStringAsDollar(o.starting_monthly_income_input))
-												]),
-											_List_Nil)
-										]))
+									_List_Nil)
 								])),
 							A2(
 							$elm$html$Html$div,
 							_List_fromArray(
 								[
-									$elm$html$Html$Attributes$class('flex h-24')
+									$elm$html$Html$Attributes$class('flex-1 text-center p-2')
 								]),
 							_List_fromArray(
 								[
 									A2(
-									$elm$html$Html$div,
+									$elm$html$Html$label,
 									_List_fromArray(
 										[
-											$elm$html$Html$Attributes$class('flex flex-col justify-center w-1/2')
+											$elm$html$Html$Attributes$class('font-bold text-center text-sm')
 										]),
 									_List_fromArray(
 										[
-											A2(
-											$elm$html$Html$label,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$class('font-bold text-center text-white')
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('Start Year ')
-												])),
-											A2(
-											$elm$html$Html$select,
-											_List_fromArray(
-												[
-													$elm$html$Html$Events$onInput(
-													$author$project$Main$UpdateStartYear(
-														$elm$core$String$fromInt(o.id))),
-													$elm$html$Html$Attributes$class('my-2 mx-2 bg-gray-100 text-center rounded w-40 h-10')
-												]),
-											$author$project$Main$viewPossibleStartYear(m))
+											$elm$html$Html$text('Monthly Income')
 										])),
 									A2(
-									$elm$html$Html$div,
+									$elm$html$Html$input,
 									_List_fromArray(
 										[
-											$elm$html$Html$Attributes$class('flex flex-col justify-center w-1/2')
+											$elm$html$Html$Events$onInput(
+											$author$project$Main$UpdateOtherMonthlyIncome(
+												$elm$core$String$fromInt(o.id))),
+											$elm$html$Html$Attributes$class('bg-gray-100 w-full text-center h-6'),
+											$elm$html$Html$Attributes$value(
+											$author$project$Main$formatStringAsDollar(o.starting_monthly_income_input))
 										]),
-									_List_fromArray(
-										[
-											A2(
-											$elm$html$Html$label,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$class('font-bold text-center text-white')
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('End Year ')
-												])),
-											A2(
-											$elm$html$Html$select,
-											_List_fromArray(
-												[
-													$elm$html$Html$Events$onInput(
-													$author$project$Main$UpdateEndYear(
-														$elm$core$String$fromInt(o.id))),
-													$elm$html$Html$Attributes$class('my-2 mx-2 bg-gray-100 text-center rounded w-40 h-10')
-												]),
-											$author$project$Main$viewPossibeEndYear(m))
-										]))
+									_List_Nil)
 								])),
 							A2(
 							$elm$html$Html$div,
 							_List_fromArray(
 								[
-									$elm$html$Html$Attributes$class('flex h-24')
+									$elm$html$Html$Attributes$class('flex-1 text-center p-2')
 								]),
 							_List_fromArray(
 								[
 									A2(
-									$elm$html$Html$div,
+									$elm$html$Html$label,
 									_List_fromArray(
 										[
-											$elm$html$Html$Attributes$class('flex flex-col justify-center items-end w-full')
+											$elm$html$Html$Attributes$class('font-bold text-center text-sm')
 										]),
 									_List_fromArray(
 										[
-											A2(
-											$elm$html$Html$label,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$class('font-bold text-center text-white self-center')
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('Growth Percentage')
-												])),
-											A2(
-											$elm$html$Html$input,
-											_List_fromArray(
-												[
-													$elm$html$Html$Events$onInput(
-													$author$project$Main$UpdateAnnualGrowthPercentage(
-														$elm$core$String$fromInt(o.id))),
-													$elm$html$Html$Attributes$class('my-2 mx-2 bg-gray-100 text-center rounded w-60 h-10'),
-													$elm$html$Html$Attributes$value(o.growth_rate_input)
-												]),
-											_List_Nil)
-										]))
+											$elm$html$Html$text('Start Year ')
+										])),
+									A2(
+									$elm$html$Html$select,
+									_List_fromArray(
+										[
+											$elm$html$Html$Events$onInput(
+											$author$project$Main$UpdateStartYear(
+												$elm$core$String$fromInt(o.id))),
+											$elm$html$Html$Attributes$class('bg-gray-100 w-full text-center h-6')
+										]),
+									$author$project$Main$viewPossibleStartYear(m))
 								])),
 							A2(
 							$elm$html$Html$div,
 							_List_fromArray(
 								[
-									$elm$html$Html$Attributes$class('flex flex-row items-center justify-center w-60 ')
+									$elm$html$Html$Attributes$class('flex-1 text-center p-2')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$label,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('font-bold text-center text-sm')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('End Year ')
+										])),
+									A2(
+									$elm$html$Html$select,
+									_List_fromArray(
+										[
+											$elm$html$Html$Events$onInput(
+											$author$project$Main$UpdateEndYear(
+												$elm$core$String$fromInt(o.id))),
+											$elm$html$Html$Attributes$class('bg-gray-100 w-full text-center h-6')
+										]),
+									$author$project$Main$viewPossibeEndYear(m))
+								])),
+							A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('flex-1 text-center p-2')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$label,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('font-bold text-center text-sm')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Growth')
+										])),
+									A2(
+									$elm$html$Html$input,
+									_List_fromArray(
+										[
+											$elm$html$Html$Events$onInput(
+											$author$project$Main$UpdateAnnualGrowthPercentage(
+												$elm$core$String$fromInt(o.id))),
+											$elm$html$Html$Attributes$class('bg-gray-100 w-full text-center h-6'),
+											$elm$html$Html$Attributes$value(o.growth_rate_input)
+										]),
+									_List_Nil)
+								])),
+							A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('flex-1 text-center p-2 flex justify-center'),
+									A2($elm$html$Html$Attributes$style, 'background-color', 'rgb(26,76,49)'),
+									A2($elm$html$Html$Attributes$style, 'border', '1px solid #1A4C31')
 								]),
 							_List_fromArray(
 								[
@@ -12785,51 +13036,23 @@ var $author$project$Main$viewOtherIncomeRow = F2(
 									$elm$html$Html$button,
 									_List_fromArray(
 										[
-											$elm$html$Html$Events$onClick($author$project$Main$InsertNewIncome),
-											$elm$html$Html$Attributes$class('h-12 my-2 mx-2 bg-gray-100 text-center rounded w-1/2 h-1/2 bg-blue-500 hover:bg-blue-700 text-white font-bold text-2xl'),
-											A2($elm$html$Html$Attributes$style, 'width', '120px'),
-											A2($elm$html$Html$Attributes$style, 'height', '67px'),
+											$elm$html$Html$Attributes$class('font-bold text-center text-white text-sm'),
 											A2(
 											$elm$html$Html$Attributes$attribute,
 											'name',
-											$elm$core$String$fromInt(o.id))
-										]),
-									_List_fromArray(
-										[
-											$elm$html$Html$text('+')
-										])),
-									A2(
-									$elm$html$Html$button,
-									_List_fromArray(
-										[
+											$elm$core$String$fromInt(o.id)),
 											A2(
 											$elm$html$Html$Events$on,
 											'click',
-											$author$project$Main$deleteOtherIncomeRowByName($author$project$Main$DeleteIncome)),
-											$elm$html$Html$Attributes$class('h-12 my-2 mx-2 bg-gray-100 text-center rounded w-1/2 h-1/2 bg-blue-500 hover:bg-blue-700 text-white font-bold text-2xl'),
-											A2($elm$html$Html$Attributes$style, 'width', '120px'),
-											A2($elm$html$Html$Attributes$style, 'height', '67px'),
-											A2(
-											$elm$html$Html$Attributes$attribute,
-											'name',
-											$elm$core$String$fromInt(o.id))
+											$author$project$Main$deleteOtherIncomeRowByName($author$project$Main$DeleteIncome))
 										]),
 									_List_fromArray(
 										[
-											$elm$html$Html$text('-')
+											$elm$html$Html$text('Remove Income')
 										]))
 								]))
 						])),
-					A2(
-					$elm$html$Html$div,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('m-3')
-						]),
-					_List_fromArray(
-						[
-							$author$project$Main$viewError(o.error)
-						]))
+					$author$project$Main$viewError(o.error)
 				]));
 	});
 var $author$project$Main$viewOtherIncome = F2(
@@ -12838,7 +13061,8 @@ var $author$project$Main$viewOtherIncome = F2(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('flex')
+					$elm$html$Html$Attributes$class('w-full flex justify-center pt-6'),
+					A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #333333')
 				]),
 			_List_fromArray(
 				[
@@ -12847,7 +13071,8 @@ var $author$project$Main$viewOtherIncome = F2(
 					_List_fromArray(
 						[
 							$elm$html$Html$Events$onClick($author$project$Main$ToggleAnsweredFactorInOtherIncome),
-							$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
+							$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
+							A2($elm$html$Html$Attributes$style, 'background-color', '#333333')
 						]),
 					_List_fromArray(
 						[
@@ -12858,7 +13083,8 @@ var $author$project$Main$viewOtherIncome = F2(
 					_List_fromArray(
 						[
 							$elm$html$Html$Events$onClick($author$project$Main$HasAnsweredOtherIncome),
-							$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
+							$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
+							A2($elm$html$Html$Attributes$style, 'background-color', '#7F6126')
 						]),
 					_List_fromArray(
 						[
@@ -12871,51 +13097,65 @@ var $author$project$Main$viewOtherIncome = F2(
 					$elm$html$Html$Attributes$class('hidden')
 				]),
 			_List_Nil);
+		var attr = as_quiz ? _List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'min-height', '75vh'),
+				A2($elm$html$Html$Attributes$style, 'max-height', '75vh'),
+				$elm$html$Html$Attributes$class('flex items-center')
+			]) : _List_Nil;
 		var list_empty = A2(
 			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-center items-center bg-gray-500 md:mx-auto mx-8 my-3 rounded-lg')
-				]),
+			attr,
 			_List_fromArray(
 				[
 					A2(
 					$elm$html$Html$div,
 					_List_fromArray(
 						[
-							$elm$html$Html$Attributes$class('text-xl font-bold text-white uppercase')
-						]),
-					_List_fromArray(
-						[
-							$elm$html$Html$text('Other Income')
-						])),
-					A2(
-					$elm$html$Html$div,
-					_List_fromArray(
-						[
-							$elm$html$Html$Attributes$class('flex justify-center items-center')
+							$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-around items-center bg-white md:mx-auto mx-8 my-3 '),
+							as_quiz ? A2($elm$html$Html$Attributes$style, 'min-height', '33vh') : A2($elm$html$Html$Attributes$style, 'none', 'none')
 						]),
 					_List_fromArray(
 						[
 							A2(
-							$elm$html$Html$button,
+							$elm$html$Html$h3,
 							_List_fromArray(
 								[
-									$elm$html$Html$Events$onClick($author$project$Main$InsertNewIncome),
-									$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
+									$elm$html$Html$Attributes$class('text-xl text-center font-bold')
 								]),
 							_List_fromArray(
 								[
-									$elm$html$Html$text('Add Other Income')
-								]))
-						])),
-					quiz_btn
+									$elm$html$Html$text('What other income should we take into account?')
+								])),
+							A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('flex justify-center items-center')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$button,
+									_List_fromArray(
+										[
+											$elm$html$Html$Events$onClick($author$project$Main$InsertNewIncome),
+											$elm$html$Html$Attributes$class('text-sm uppercase m-2 text-white font-bold py-2 px-3 self-center'),
+											A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Add New Income')
+										]))
+								])),
+							quiz_btn
+						]))
 				]));
 		var all_incomes = A2(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-center items-center bg-gray-500 md:mx-auto mx-8 my-3 rounded-lg')
+					$elm$html$Html$Attributes$class('p-5 w-full flex flex-col justify-center items-center md:mx-auto mx-8 my-3 ')
 				]),
 			A2(
 				$elm$core$List$append,
@@ -12923,13 +13163,19 @@ var $author$project$Main$viewOtherIncome = F2(
 					[
 						A2(
 						$elm$html$Html$div,
+						_List_Nil,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('text-xl font-bold text-white uppercase')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Other Income')
+								A2(
+								$elm$html$Html$h3,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('text-xl text-center font-bold')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Please add income streams below.')
+									]))
 							]))
 					]),
 				$elm$core$List$reverse(
@@ -12941,7 +13187,7 @@ var $author$project$Main$viewOtherIncome = F2(
 								$elm$html$Html$div,
 								_List_fromArray(
 									[
-										$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-center items-center bg-gray-500 md:mx-auto mx-8 my-3 rounded-lg')
+										$elm$html$Html$Attributes$class('')
 									]),
 								_List_Nil)
 							]),
@@ -12952,19 +13198,49 @@ var $author$project$Main$viewOtherIncome = F2(
 								$elm$core$Dict$values(m.other_monthly_incomes)))))));
 		var list_not_empty = A2(
 			$elm$html$Html$div,
+			attr,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-center items-center bg-gray-500 md:mx-auto mx-8 my-3 rounded-lg')
-				]),
-			_List_fromArray(
-				[all_incomes, quiz_btn]));
-		return $elm$core$Dict$isEmpty(m.other_monthly_incomes) ? list_empty : list_not_empty;
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-center items-center bg-white md:mx-auto mx-8 my-3 ')
+						]),
+					_List_fromArray(
+						[
+							all_incomes,
+							A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('flex items-center justify-center w-60 ')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$button,
+									_List_fromArray(
+										[
+											$elm$html$Html$Events$onClick($author$project$Main$InsertNewIncome),
+											$elm$html$Html$Attributes$class('text-sm uppercase m-2 text-white font-bold py-2 px-3 self-center w-40'),
+											A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('Add New Income')
+										]))
+								])),
+							quiz_btn
+						]))
+				]));
+		return list_not_empty;
 	});
 var $author$project$Main$PersonBirthdayAndSocialErrorCheck = F2(
 	function (a, b) {
 		return {$: 'PersonBirthdayAndSocialErrorCheck', a: a, b: b};
 	});
-var $author$project$Main$ToggleGrossTargetIncome = {$: 'ToggleGrossTargetIncome'};
+var $author$project$Main$ToggleAnsweredFactorInSocialSec = {$: 'ToggleAnsweredFactorInSocialSec'};
 var $author$project$Main$UpdateBirthYearClient1 = function (a) {
 	return {$: 'UpdateBirthYearClient1', a: a};
 };
@@ -12994,42 +13270,39 @@ var $author$project$Main$viewPossibleBirthYears = function (m) {
 			},
 			m.possible_birth_years));
 };
-var $author$project$Main$viewPersonDateOfBirth = F3(
+var $author$project$Main$viewPerson1 = F3(
 	function (m, as_quiz, factor_in_social_sec) {
 		return A2(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					A2($elm$html$Html$Attributes$style, 'min-height', '75vh'),
-					A2($elm$html$Html$Attributes$style, 'max-height', '75vh'),
-					$elm$html$Html$Attributes$class('flex items-center')
+					$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-around items-center bg-white md:mx-auto mx-8 my-3 ')
 				]),
 			_List_fromArray(
 				[
 					A2(
+					$elm$html$Html$h3,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('text-xl text-center font-bold')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Person 1')
+						])),
+					A2(
 					$elm$html$Html$div,
 					_List_fromArray(
 						[
-							$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-around items-center bg-white md:mx-auto mx-8 my-3 '),
-							A2($elm$html$Html$Attributes$style, 'min-height', '33vh')
+							$elm$html$Html$Attributes$class('flex flex-col items-center justify-center w-full py-6')
 						]),
 					_List_fromArray(
 						[
 							A2(
-							$elm$html$Html$h3,
-							_List_fromArray(
-								[
-									$elm$html$Html$Attributes$class('text-xl text-center uppercase font-bold')
-								]),
-							_List_fromArray(
-								[
-									$elm$html$Html$text('Person 1')
-								])),
-							A2(
 							$elm$html$Html$div,
 							_List_fromArray(
 								[
-									$elm$html$Html$Attributes$class('flex flex-col items-center justify-center w-full py-6')
+									$elm$html$Html$Attributes$class('flex flex-row items-center justify-center w-full')
 								]),
 							_List_fromArray(
 								[
@@ -13037,415 +13310,899 @@ var $author$project$Main$viewPersonDateOfBirth = F3(
 									$elm$html$Html$div,
 									_List_fromArray(
 										[
-											$elm$html$Html$Attributes$class('flex flex-row items-center justify-center w-full')
+											$elm$html$Html$Attributes$class('text-md w-full text-right mr-6')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('When is your date of birth?')
+										])),
+									A2(
+									$elm$html$Html$div,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('flex w-full ')
 										]),
 									_List_fromArray(
 										[
 											A2(
-											$elm$html$Html$div,
+											$elm$html$Html$select,
 											_List_fromArray(
 												[
-													$elm$html$Html$Attributes$class('text-md w-full text-right mr-6')
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('What is you Date of Birth?')
-												])),
-											A2(
-											$elm$html$Html$div,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$class('flex w-full ')
+													$elm$html$Html$Events$onInput($author$project$Main$UpdateSocialSecurityStartMonthClient1),
+													$elm$html$Html$Attributes$class('text-center w-24')
 												]),
 											_List_fromArray(
 												[
 													A2(
-													$elm$html$Html$select,
+													$elm$html$Html$option,
 													_List_fromArray(
 														[
-															$elm$html$Html$Events$onInput($author$project$Main$UpdateSocialSecurityStartMonthClient1),
-															$elm$html$Html$Attributes$class('text-center w-24')
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(1))
 														]),
 													_List_fromArray(
 														[
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(1))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('January')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(2))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('February')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(3))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('March')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(4))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('April')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(5))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('May')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(6))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('June')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(7))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('July')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(8))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('August')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(9))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('September')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(10))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('October')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(11))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('November')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(12))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('December')
-																]))
+															$elm$html$Html$text('January')
 														])),
 													A2(
-													$elm$html$Html$select,
+													$elm$html$Html$option,
 													_List_fromArray(
 														[
-															$elm$html$Html$Events$onInput($author$project$Main$UpdateBirthYearClient1),
-															$elm$html$Html$Attributes$class('ml-2 text-center w-24')
-														]),
-													$author$project$Main$viewPossibleBirthYears(m))
-												]))
-										])),
-									(factor_in_social_sec || (!as_quiz)) ? A2(
-									$elm$html$Html$div,
-									_List_fromArray(
-										[
-											$elm$html$Html$Attributes$class('flex flex-row items-center justify-center w-full mt-4')
-										]),
-									_List_fromArray(
-										[
-											A2(
-											$elm$html$Html$div,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$class('text-md w-1/2 text-right mr-6')
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('At what age will you start to receive social security?')
-												])),
-											A2(
-											$elm$html$Html$div,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$class('flex w-1/2')
-												]),
-											_List_fromArray(
-												[
-													A2(
-													$elm$html$Html$select,
-													_List_fromArray(
-														[
-															$elm$html$Html$Events$onInput($author$project$Main$UpdateSocialSecAgeClient1),
-															$elm$html$Html$Attributes$class('w-24 text-center')
-														]),
-													_List_fromArray(
-														[
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(62))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('62')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(63))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('63')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(64))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('64')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(65))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('65')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(66))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('66')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(67))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('67')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(68))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('68')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(69))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('69')
-																])),
-															A2(
-															$elm$html$Html$option,
-															_List_fromArray(
-																[
-																	$elm$html$Html$Attributes$value(
-																	$elm$core$String$fromInt(70))
-																]),
-															_List_fromArray(
-																[
-																	$elm$html$Html$text('70')
-																]))
-														]))
-												]))
-										])) : A2(
-									$elm$html$Html$div,
-									_List_fromArray(
-										[
-											$elm$html$Html$Attributes$class('hidden')
-										]),
-									_List_Nil),
-									(factor_in_social_sec || (!as_quiz)) ? A2(
-									$elm$html$Html$div,
-									_List_fromArray(
-										[
-											$elm$html$Html$Attributes$class('flex flex-row items-center justify-center w-full mt-3')
-										]),
-									_List_fromArray(
-										[
-											A2(
-											$elm$html$Html$div,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$class('text-md w-1/2 text-right mr-6')
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('What is your estimated monthly social security income?')
-												])),
-											A2(
-											$elm$html$Html$div,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$class('flex w-1/2')
-												]),
-											_List_fromArray(
-												[
-													A2(
-													$elm$html$Html$input,
-													_List_fromArray(
-														[
-															$elm$html$Html$Events$onInput($author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient1),
-															$elm$html$Html$Attributes$class('my-2 mx-0 w-24 text-center font-bold'),
-															A2($elm$html$Html$Attributes$style, 'border', '2px solid #1A4C31'),
 															$elm$html$Html$Attributes$value(
-															$author$project$Main$formatStringAsDollar(m.client_1.social_security_monthly_income_as_string))
+															$elm$core$String$fromInt(2))
 														]),
-													_List_Nil)
-												]))
-										])) : A2(
-									$elm$html$Html$div,
-									_List_fromArray(
-										[
-											$elm$html$Html$Attributes$class('hidden')
-										]),
-									_List_Nil),
-									(factor_in_social_sec || (!as_quiz)) ? $author$project$Main$viewError(m.client_1.error) : A2(
-									$elm$html$Html$div,
-									_List_fromArray(
-										[
-											$elm$html$Html$Attributes$class('hidden')
-										]),
-									_List_Nil)
+													_List_fromArray(
+														[
+															$elm$html$Html$text('February')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(3))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('March')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(4))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('April')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(5))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('May')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(6))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('June')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(7))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('July')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(8))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('August')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(9))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('September')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(10))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('October')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(11))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('November')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(12))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('December')
+														]))
+												])),
+											A2(
+											$elm$html$Html$select,
+											_List_fromArray(
+												[
+													$elm$html$Html$Events$onInput($author$project$Main$UpdateBirthYearClient1),
+													$elm$html$Html$Attributes$class('ml-2 text-center w-24')
+												]),
+											$author$project$Main$viewPossibleBirthYears(m))
+										]))
 								])),
-							A2(
+							factor_in_social_sec ? A2(
 							$elm$html$Html$div,
 							_List_fromArray(
 								[
-									$elm$html$Html$Attributes$class('w-full flex justify-center pt-6'),
-									A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #333333')
+									$elm$html$Html$Attributes$class('flex flex-row items-center justify-center w-full mt-4')
 								]),
 							_List_fromArray(
 								[
 									A2(
-									$elm$html$Html$button,
+									$elm$html$Html$div,
 									_List_fromArray(
 										[
-											$elm$html$Html$Events$onClick($author$project$Main$ToggleGrossTargetIncome),
-											$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
-											A2($elm$html$Html$Attributes$style, 'background-color', '#333333')
+											$elm$html$Html$Attributes$class('text-md w-1/2 text-right mr-6')
 										]),
 									_List_fromArray(
 										[
-											$elm$html$Html$text('Back')
+											$elm$html$Html$text('At what age do you want to start Social Security payments?')
 										])),
 									A2(
-									$elm$html$Html$button,
+									$elm$html$Html$div,
 									_List_fromArray(
 										[
-											$elm$html$Html$Events$onClick(
-											A2(
-												$author$project$Main$PersonBirthdayAndSocialErrorCheck,
-												m.client_1.social_security_monthly_income_as_string,
-												m.client_2_exists ? m.client_2.social_security_monthly_income_as_string : '1')),
-											$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
-											A2($elm$html$Html$Attributes$style, 'background-color', '#7F6126')
+											$elm$html$Html$Attributes$class('flex w-1/2')
 										]),
 									_List_fromArray(
 										[
-											$elm$html$Html$text('Next')
+											A2(
+											$elm$html$Html$select,
+											_List_fromArray(
+												[
+													$elm$html$Html$Events$onInput($author$project$Main$UpdateSocialSecAgeClient1),
+													$elm$html$Html$Attributes$class('w-24 text-center')
+												]),
+											_List_fromArray(
+												[
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(62))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('62')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(63))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('63')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(64))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('64')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(65))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('65')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(66))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('66')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(67))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('67')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(68))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('68')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(69))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('69')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(70))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('70')
+														]))
+												]))
 										]))
+								])) : A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('hidden')
+								]),
+							_List_Nil),
+							factor_in_social_sec ? A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('flex flex-row items-center justify-center w-full mt-3')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$div,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('text-md w-1/2 text-right mr-6')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('What is your estimated monthly social security income?')
+										])),
+									A2(
+									$elm$html$Html$div,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('flex w-1/2')
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$input,
+											_List_fromArray(
+												[
+													$elm$html$Html$Events$onInput($author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient1),
+													$elm$html$Html$Attributes$class('my-2 mx-0 w-24 text-center font-bold'),
+													A2($elm$html$Html$Attributes$style, 'border', '2px solid #1A4C31'),
+													$elm$html$Html$Attributes$value(
+													$author$project$Main$formatStringAsDollar(m.client_1.social_security_monthly_income_as_string))
+												]),
+											_List_Nil)
+										]))
+								])) : A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('hidden')
+								]),
+							_List_Nil),
+							factor_in_social_sec ? $author$project$Main$viewError(m.client_1.error) : A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('hidden')
+								]),
+							_List_Nil)
+						])),
+					m.client_2_exists ? A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('hidden')
+						]),
+					_List_Nil) : ((!as_quiz) ? A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('hidden')
+						]),
+					_List_Nil) : A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('w-full flex justify-center pt-6'),
+							A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #333333')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick($author$project$Main$ToggleAnsweredFactorInSocialSec),
+									$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
+									A2($elm$html$Html$Attributes$style, 'background-color', '#333333')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Back')
+								])),
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick(
+									A2(
+										$author$project$Main$PersonBirthdayAndSocialErrorCheck,
+										m.client_1.social_security_monthly_income_as_string,
+										m.client_2_exists ? m.client_2.social_security_monthly_income_as_string : '1')),
+									$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
+									A2($elm$html$Html$Attributes$style, 'background-color', '#7F6126')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Next')
 								]))
-						]))
+						])))
+				]));
+	});
+var $author$project$Main$UpdateBirthYearClient2 = function (a) {
+	return {$: 'UpdateBirthYearClient2', a: a};
+};
+var $author$project$Main$UpdateSocialSecAgeClient2 = function (a) {
+	return {$: 'UpdateSocialSecAgeClient2', a: a};
+};
+var $author$project$Main$UpdateSocialSecurityStartMonthClient2 = function (a) {
+	return {$: 'UpdateSocialSecurityStartMonthClient2', a: a};
+};
+var $author$project$Main$viewPerson2 = F3(
+	function (m, as_quiz, factor_in_social_sec) {
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-around items-center bg-white md:mx-auto mx-8 my-3 '),
+					as_quiz ? A2($elm$html$Html$Attributes$style, 'min-height', '33vh') : A2($elm$html$Html$Attributes$style, 'none', 'none')
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$elm$html$Html$h3,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('text-xl text-center font-bold')
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text('Person 1')
+						])),
+					A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('flex flex-col items-center justify-center w-full py-6')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('flex flex-row items-center justify-center w-full')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$div,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('text-md w-full text-right mr-6')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('When is your date of birth?')
+										])),
+									A2(
+									$elm$html$Html$div,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('flex w-full ')
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$select,
+											_List_fromArray(
+												[
+													$elm$html$Html$Events$onInput($author$project$Main$UpdateSocialSecurityStartMonthClient2),
+													$elm$html$Html$Attributes$class('text-center w-24')
+												]),
+											_List_fromArray(
+												[
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(1))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('January')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(2))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('February')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(3))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('March')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(4))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('April')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(5))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('May')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(6))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('June')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(7))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('July')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(8))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('August')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(9))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('September')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(10))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('October')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(11))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('November')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(12))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('December')
+														]))
+												])),
+											A2(
+											$elm$html$Html$select,
+											_List_fromArray(
+												[
+													$elm$html$Html$Events$onInput($author$project$Main$UpdateBirthYearClient2),
+													$elm$html$Html$Attributes$class('ml-2 text-center w-24')
+												]),
+											$author$project$Main$viewPossibleBirthYears(m))
+										]))
+								])),
+							factor_in_social_sec ? A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('flex flex-row items-center justify-center w-full mt-4')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$div,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('text-md w-1/2 text-right mr-6')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('At what age do you want to start Social Security payments?')
+										])),
+									A2(
+									$elm$html$Html$div,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('flex w-1/2')
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$select,
+											_List_fromArray(
+												[
+													$elm$html$Html$Events$onInput($author$project$Main$UpdateSocialSecAgeClient2),
+													$elm$html$Html$Attributes$class('w-24 text-center')
+												]),
+											_List_fromArray(
+												[
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(62))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('62')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(63))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('63')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(64))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('64')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(65))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('65')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(66))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('66')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(67))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('67')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(68))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('68')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(69))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('69')
+														])),
+													A2(
+													$elm$html$Html$option,
+													_List_fromArray(
+														[
+															$elm$html$Html$Attributes$value(
+															$elm$core$String$fromInt(70))
+														]),
+													_List_fromArray(
+														[
+															$elm$html$Html$text('70')
+														]))
+												]))
+										]))
+								])) : A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('hidden')
+								]),
+							_List_Nil),
+							factor_in_social_sec ? A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('flex flex-row items-center justify-center w-full mt-3')
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$elm$html$Html$div,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('text-md w-1/2 text-right mr-6')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('What is your estimated monthly social security income?')
+										])),
+									A2(
+									$elm$html$Html$div,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('flex w-1/2')
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$elm$html$Html$input,
+											_List_fromArray(
+												[
+													$elm$html$Html$Events$onInput($author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient2),
+													$elm$html$Html$Attributes$class('my-2 mx-0 w-24 text-center font-bold'),
+													A2($elm$html$Html$Attributes$style, 'border', '2px solid #1A4C31'),
+													$elm$html$Html$Attributes$value(
+													$author$project$Main$formatStringAsDollar(m.client_2.social_security_monthly_income_as_string))
+												]),
+											_List_Nil)
+										]))
+								])) : A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('hidden')
+								]),
+							_List_Nil),
+							factor_in_social_sec ? $author$project$Main$viewError(m.client_2.error) : A2(
+							$elm$html$Html$div,
+							_List_fromArray(
+								[
+									$elm$html$Html$Attributes$class('hidden')
+								]),
+							_List_Nil)
+						])),
+					as_quiz ? A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('w-full flex justify-center pt-6'),
+							A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #333333')
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick($author$project$Main$ToggleAnsweredFactorInSocialSec),
+									$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
+									A2($elm$html$Html$Attributes$style, 'background-color', '#333333')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Back')
+								])),
+							A2(
+							$elm$html$Html$button,
+							_List_fromArray(
+								[
+									$elm$html$Html$Events$onClick(
+									A2(
+										$author$project$Main$PersonBirthdayAndSocialErrorCheck,
+										m.client_1.social_security_monthly_income_as_string,
+										m.client_2_exists ? m.client_2.social_security_monthly_income_as_string : '1')),
+									$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
+									A2($elm$html$Html$Attributes$style, 'background-color', '#7F6126')
+								]),
+							_List_fromArray(
+								[
+									$elm$html$Html$text('Next')
+								]))
+						])) : A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('hidden')
+						]),
+					_List_Nil)
+				]));
+	});
+var $author$project$Main$viewPersonDateOfBirth = F3(
+	function (m, as_quiz, factor_in_social_sec) {
+		var attr = as_quiz ? _List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'min-height', '75vh'),
+				A2($elm$html$Html$Attributes$style, 'max-height', '75vh'),
+				$elm$html$Html$Attributes$class('flex items-center flex-col justify-center')
+			]) : _List_Nil;
+		return A2(
+			$elm$html$Html$div,
+			attr,
+			_List_fromArray(
+				[
+					A3($author$project$Main$viewPerson1, m, as_quiz, factor_in_social_sec),
+					m.client_2_exists ? A3($author$project$Main$viewPerson2, m, as_quiz, factor_in_social_sec) : A2(
+					$elm$html$Html$div,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$class('hidden')
+						]),
+					_List_Nil)
 				]));
 	});
 var $author$project$Main$TogglePlanType = function (a) {
@@ -13456,7 +14213,7 @@ var $author$project$Main$viewPlanType = function (m) {
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
-				$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-center items-center bg-gray-500 md:mx-auto mx-8 my-3 rounded-lg')
+				$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-center items-center bg-white md:mx-auto mx-8 my-3')
 			]),
 		_List_fromArray(
 			[
@@ -13464,11 +14221,11 @@ var $author$project$Main$viewPlanType = function (m) {
 				$elm$html$Html$h3,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('text-xl text-white text-center uppercase font-bold')
+						$elm$html$Html$Attributes$class('text-xl text-center font-bold')
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text('Plan Type')
+						$elm$html$Html$text('What type of plan would you like?')
 					])),
 				A2(
 				$elm$html$Html$div,
@@ -13497,7 +14254,7 @@ var $author$project$Main$viewPlanType = function (m) {
 								$elm$html$Html$div,
 								_List_fromArray(
 									[
-										$elm$html$Html$Attributes$class('mx-2 text-white font-bold')
+										$elm$html$Html$Attributes$class('mx-2 font-bold')
 									]),
 								_List_fromArray(
 									[
@@ -13526,7 +14283,7 @@ var $author$project$Main$viewPlanType = function (m) {
 								$elm$html$Html$div,
 								_List_fromArray(
 									[
-										$elm$html$Html$Attributes$class('mx-2 text-white font-bold')
+										$elm$html$Html$Attributes$class('mx-2 font-bold')
 									]),
 								_List_fromArray(
 									[
@@ -13535,6 +14292,319 @@ var $author$project$Main$viewPlanType = function (m) {
 							]))
 					]))
 			]));
+};
+var $author$project$Main$viewProgressBar = function (model) {
+	var _v0 = model.quiz.num_questions_answered;
+	switch (_v0) {
+		case 0:
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('w-full flex justify-center p-3'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#333333')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('w-3/4 flex')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white flex justify-end items-center pr-3')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('0%')
+									]))
+							]))
+					]));
+		case 1:
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('w-full flex justify-center p-3'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#333333')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('w-3/4 flex')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white'),
+										A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white flex justify-end items-center pr-3')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('20%')
+									]))
+							]))
+					]));
+		case 2:
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('w-full flex justify-center p-3'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#333333')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('w-3/4 flex')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white'),
+										A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white'),
+										A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white flex justify-end items-center pr-3')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('40%')
+									]))
+							]))
+					]));
+		case 3:
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('w-full flex justify-center p-3'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#333333')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('w-3/4 flex')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white'),
+										A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white'),
+										A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white'),
+										A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white flex justify-end items-center pr-3')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('60%')
+									]))
+							]))
+					]));
+		case 4:
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('w-full flex justify-center p-3'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#333333')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('w-3/4 flex')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white'),
+										A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white'),
+										A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white'),
+										A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white'),
+										A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+									]),
+								_List_Nil),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('flex-1 h-12 bg-white flex justify-end items-center pr-3')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('80%')
+									]))
+							]))
+					]));
+		default:
+			return A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('hidden')
+					]),
+				_List_Nil);
+	}
 };
 var $author$project$Main$getIncomeValOrZero = F2(
 	function (a, i) {
@@ -13603,11 +14673,7 @@ var $author$project$Main$formatBucketVal = F2(
 	function (c, p) {
 		return ((!p) && (_Utils_cmp(p, c) < 0)) ? $author$project$Main$formatIntAsDollar(c) : ((!p) ? '' : $author$project$Main$formatIntAsDollarShowZero(c));
 	});
-var $author$project$Main$blueBackgroundClass = 'bg-blue-300';
 var $author$project$Main$standardCellClasses = 'px-4 py-2 text-center border flex justify-center items-center text-sm w-48';
-var $author$project$Main$addClassesToStandardCellClasses = function (added_classes) {
-	return A2($author$project$Main$addCSSClasses, $author$project$Main$standardCellClasses, added_classes);
-};
 var $author$project$Main$viewTableCell = F2(
 	function (cell_text, cell_classes) {
 		return A2(
@@ -13621,21 +14687,23 @@ var $author$project$Main$viewTableCell = F2(
 					$elm$html$Html$text(cell_text)
 				]));
 	});
-var $author$project$Main$viewStandardCellWithAddedClasses = F2(
-	function (cell_text, additional_classes) {
-		var cell_classes = $author$project$Main$addClassesToStandardCellClasses(additional_classes);
-		return A2($author$project$Main$viewTableCell, cell_text, cell_classes);
-	});
-var $author$project$Main$viewBucketCellWithBlueBackground = function (cell_text) {
-	return A2($author$project$Main$viewStandardCellWithAddedClasses, cell_text, $author$project$Main$blueBackgroundClass);
-};
 var $author$project$Main$viewStandardCell = function (cell_text) {
 	return A2($author$project$Main$viewTableCell, cell_text, $author$project$Main$standardCellClasses);
 };
 var $author$project$Main$viewBucketCell = F3(
 	function (row_num, current, previous) {
 		var formatted = A2($author$project$Main$formatBucketVal, current, previous);
-		return (_Utils_cmp(current, previous) < 0) ? $author$project$Main$viewBucketCellWithBlueBackground(formatted) : $author$project$Main$viewStandardCell(formatted);
+		return (_Utils_cmp(current, previous) < 0) ? A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class($author$project$Main$standardCellClasses + ' text-white'),
+					A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text(formatted)
+				])) : $author$project$Main$viewStandardCell(formatted);
 	});
 var $author$project$Main$addHiddenToStandardCellClasses = function (b) {
 	return b ? ($author$project$Main$standardCellClasses + ' hidden') : $author$project$Main$standardCellClasses;
@@ -13649,13 +14717,14 @@ var $author$project$Main$viewRowWithFiveBuckets = F2(
 	function (m, tr) {
 		var hide_social_security = $author$project$Main$hideSocialSecurity(m);
 		var hide_other_income = $author$project$Main$isOtherMonthlyIncomeHidden(m);
-		var gray_class = (!A2($elm$core$Basics$modBy, 2, tr.row_num)) ? '' : 'bg-gray-300';
+		var gray_class = (!A2($elm$core$Basics$modBy, 2, tr.row_num)) ? '' : 'bg-white';
 		var current_row_class = (gray_class === '') ? $author$project$Main$standardTableRowClasses : A2($author$project$Main$addCSSClasses, $author$project$Main$standardTableRowClasses, gray_class);
 		return A2(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class(current_row_class)
+					$elm$html$Html$Attributes$class(current_row_class),
+					(gray_class === '') ? A2($elm$html$Html$Attributes$style, 'background-color', 'rgba(51,51,51,0.6)') : A2($elm$html$Html$Attributes$style, 'none', 'none')
 				]),
 			_List_fromArray(
 				[
@@ -13693,15 +14762,16 @@ var $author$project$Main$viewRowWithFiveBuckets = F2(
 	});
 var $author$project$Main$viewRowWithThreeBuckets = F2(
 	function (m, tr) {
+		var white_class = (!A2($elm$core$Basics$modBy, 2, tr.row_num)) ? '' : 'bg-white';
 		var hide_social_security = $author$project$Main$hideSocialSecurity(m);
 		var hide_other_income = $author$project$Main$isOtherMonthlyIncomeHidden(m);
-		var gray_class = (!A2($elm$core$Basics$modBy, 2, tr.row_num)) ? '' : 'bg-gray-300';
-		var current_row_class = (gray_class === '') ? $author$project$Main$standardTableRowClasses : A2($author$project$Main$addCSSClasses, $author$project$Main$standardTableRowClasses, gray_class);
+		var current_row_class = (white_class === '') ? $author$project$Main$standardTableRowClasses : A2($author$project$Main$addCSSClasses, $author$project$Main$standardTableRowClasses, white_class);
 		return A2(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class(current_row_class)
+					$elm$html$Html$Attributes$class(current_row_class),
+					(white_class === '') ? A2($elm$html$Html$Attributes$style, 'background-color', 'rgba(51,51,51,0.3)') : A2($elm$html$Html$Attributes$style, 'none', 'none')
 				]),
 			_List_fromArray(
 				[
@@ -13860,7 +14930,17 @@ var $author$project$Main$createTableDataFrom = F3(
 var $author$project$Main$headerTableRowClasses = 'bg-gray-400 flex mx-4';
 var $author$project$Main$standardHeaderCellClasses = 'min-h-full px-4 py-2 text-center border flex justify-center items-center text-sm w-48 ';
 var $author$project$Main$viewStandardHeaderCell = function (cell_text) {
-	return A2($author$project$Main$viewTableCell, cell_text, $author$project$Main$standardHeaderCellClasses);
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class($author$project$Main$standardHeaderCellClasses + ' text-white'),
+				A2($elm$html$Html$Attributes$style, 'background-color', '#333333')
+			]),
+		_List_fromArray(
+			[
+				$elm$html$Html$text(cell_text)
+			]));
 };
 var $author$project$Main$addHiddenToHeaderCellClasses = function (b) {
 	return b ? ($author$project$Main$standardHeaderCellClasses + ' hidden') : $author$project$Main$standardHeaderCellClasses;
@@ -13868,7 +14948,17 @@ var $author$project$Main$addHiddenToHeaderCellClasses = function (b) {
 var $author$project$Main$viewStandardHidableHeaderCell = F2(
 	function (cell_text, b) {
 		var cell_classes = $author$project$Main$addHiddenToHeaderCellClasses(b);
-		return A2($author$project$Main$viewTableCell, cell_text, cell_classes);
+		return A2(
+			$elm$html$Html$div,
+			_List_fromArray(
+				[
+					$elm$html$Html$Attributes$class(cell_classes + ' text-white'),
+					A2($elm$html$Html$Attributes$style, 'background-color', '#333333')
+				]),
+			_List_fromArray(
+				[
+					$elm$html$Html$text(cell_text)
+				]));
 	});
 var $author$project$Main$viewFiveBucketHeaderRow = function (m) {
 	var hide_social_security = $author$project$Main$hideSocialSecurity(m);
@@ -13929,30 +15019,17 @@ var $author$project$Main$viewThreeBucketHeaderRow = function (m) {
 var $author$project$Main$viewBucketHeader = function (m) {
 	return m.plan_5_is_selected ? $author$project$Main$viewFiveBucketHeaderRow(m) : $author$project$Main$viewThreeBucketHeaderRow(m);
 };
-var $author$project$Main$addClassesToHeaderCellClasses = function (added_classes) {
-	return A2($author$project$Main$addCSSClasses, $author$project$Main$standardHeaderCellClasses, added_classes);
-};
-var $author$project$Main$viewStandardHeaderCellWithAddedClass = F2(
-	function (cell_text, additional_classes) {
-		var cell_classes = $author$project$Main$addClassesToHeaderCellClasses(additional_classes);
-		return A2($author$project$Main$viewTableCell, cell_text, cell_classes);
-	});
-var $author$project$Main$viewHidableHeaderCellWithAddedClasses = F3(
-	function (cell_text, additional_classes, b) {
-		var cell_classes = A2(
-			$author$project$Main$addCSSClasses,
-			additional_classes,
-			$author$project$Main$addHiddenToHeaderCellClasses(b));
-		return A2($author$project$Main$viewStandardHeaderCellWithAddedClass, cell_text, cell_classes);
-	});
-var $author$project$Main$viewHidableHeaderCellWithBlueBackground = F2(
-	function (cell_text, b) {
-		return A3($author$project$Main$viewHidableHeaderCellWithAddedClasses, cell_text, $author$project$Main$blueBackgroundClass, b);
-	});
-var $author$project$Main$viewStandardEmptyHeaderCell = A2($author$project$Main$viewTableCell, '', $author$project$Main$standardHeaderCellClasses);
-var $author$project$Main$viewStandardHeaderCellWithBlueBackground = function (s) {
-	return A2($author$project$Main$viewStandardHeaderCellWithAddedClass, s, $author$project$Main$blueBackgroundClass);
-};
+var $author$project$Main$viewStandardEmptyHeaderCell = A2(
+	$elm$html$Html$div,
+	_List_fromArray(
+		[
+			$elm$html$Html$Attributes$class($author$project$Main$standardHeaderCellClasses),
+			A2($elm$html$Html$Attributes$style, 'background-color', '#333333')
+		]),
+	_List_fromArray(
+		[
+			$elm$html$Html$text('')
+		]));
 var $author$project$Main$viewPercentageHeaderWithFiveBuckets = function (m) {
 	var hide_social_security = $author$project$Main$hideSocialSecurity(m);
 	var hide_other_income = $author$project$Main$isOtherMonthlyIncomeHidden(m);
@@ -13971,14 +15048,90 @@ var $author$project$Main$viewPercentageHeaderWithFiveBuckets = function (m) {
 				$author$project$Main$viewStandardEmptyHeaderCell,
 				$author$project$Main$viewStandardEmptyHeaderCell,
 				A2($author$project$Main$viewStandardHidableHeaderCell, '', hide_other_income),
-				A2($author$project$Main$viewHidableHeaderCellWithBlueBackground, '0.5%', hide_social_security),
+				hide_social_security ? A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('hidden')
+					]),
+				_List_Nil) : A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class($author$project$Main$standardCellClasses + ' text-white'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('0.5%')
+					])),
 				$author$project$Main$viewStandardEmptyHeaderCell,
-				$author$project$Main$viewStandardHeaderCellWithBlueBackground('1%'),
-				$author$project$Main$viewStandardHeaderCellWithBlueBackground('2.5%'),
-				$author$project$Main$viewStandardHeaderCellWithBlueBackground('3%'),
-				$author$project$Main$viewStandardHeaderCellWithBlueBackground('3.5%'),
-				$author$project$Main$viewStandardHeaderCellWithBlueBackground('4%'),
-				$author$project$Main$viewStandardHeaderCellWithBlueBackground('6%'),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class($author$project$Main$standardCellClasses + ' text-white'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('1%')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class($author$project$Main$standardCellClasses + ' text-white'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('2.5%')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class($author$project$Main$standardCellClasses + ' text-white'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('3%')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class($author$project$Main$standardCellClasses + ' text-white'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('3.5%')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class($author$project$Main$standardCellClasses + ' text-white'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('4%')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class($author$project$Main$standardCellClasses + ' text-white'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('6%')
+					])),
 				$author$project$Main$viewStandardEmptyHeaderCell
 			]));
 };
@@ -14000,12 +15153,68 @@ var $author$project$Main$viewPercentageHeaderWithThreeBuckets = function (m) {
 				$author$project$Main$viewStandardEmptyHeaderCell,
 				$author$project$Main$viewStandardEmptyHeaderCell,
 				A2($author$project$Main$viewStandardHidableHeaderCell, '', hide_other_income),
-				A2($author$project$Main$viewHidableHeaderCellWithBlueBackground, '0.5%', hide_social_security),
+				hide_social_security ? A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('hidden')
+					]),
+				_List_Nil) : A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class($author$project$Main$standardCellClasses + ' text-white'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('0.5%')
+					])),
 				$author$project$Main$viewStandardEmptyHeaderCell,
-				$author$project$Main$viewStandardHeaderCellWithBlueBackground('1%'),
-				$author$project$Main$viewStandardHeaderCellWithBlueBackground('3%'),
-				$author$project$Main$viewStandardHeaderCellWithBlueBackground('4%'),
-				$author$project$Main$viewStandardHeaderCellWithBlueBackground('6%'),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class($author$project$Main$standardCellClasses + ' text-white'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('1%')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class($author$project$Main$standardCellClasses + ' text-white'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('3%')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class($author$project$Main$standardCellClasses + ' text-white'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('4%')
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class($author$project$Main$standardCellClasses + ' text-white'),
+						A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+					]),
+				_List_fromArray(
+					[
+						$elm$html$Html$text('6%')
+					])),
 				$author$project$Main$viewStandardEmptyHeaderCell
 			]));
 };
@@ -14028,7 +15237,10 @@ var $author$project$Main$viewTableHeaders = function (m) {
 var $author$project$Main$viewTable = function (m) {
 	return A2(
 		$elm$html$Html$div,
-		_List_Nil,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('bg-white pt-6')
+			]),
 		_List_fromArray(
 			[
 				$author$project$Main$viewTableHeaders(m),
@@ -14038,7 +15250,6 @@ var $author$project$Main$viewTable = function (m) {
 				A3($author$project$Main$createTableDataFrom, m, m.buckets, m.income_from_assets))
 			]));
 };
-var $author$project$Main$ToggleAnsweredFactorInSocialSec = {$: 'ToggleAnsweredFactorInSocialSec'};
 var $author$project$Main$UpdateStartingIncome = function (a) {
 	return {$: 'UpdateStartingIncome', a: a};
 };
@@ -14047,14 +15258,15 @@ var $author$project$Main$UpdateStartingIncomeAsQuiz = function (a) {
 };
 var $author$project$Main$viewTargetGrossIncome = F2(
 	function (m, as_quiz) {
+		var attr = as_quiz ? _List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'min-height', '75vh'),
+				A2($elm$html$Html$Attributes$style, 'max-height', '75vh'),
+				$elm$html$Html$Attributes$class('flex items-center')
+			]) : _List_Nil;
 		return A2(
 			$elm$html$Html$div,
-			_List_fromArray(
-				[
-					A2($elm$html$Html$Attributes$style, 'min-height', '75vh'),
-					A2($elm$html$Html$Attributes$style, 'max-height', '75vh'),
-					$elm$html$Html$Attributes$class('flex items-center')
-				]),
+			attr,
 			_List_fromArray(
 				[
 					A2(
@@ -14062,7 +15274,7 @@ var $author$project$Main$viewTargetGrossIncome = F2(
 					_List_fromArray(
 						[
 							$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-around items-center bg-white md:mx-auto mx-8 my-3 '),
-							A2($elm$html$Html$Attributes$style, 'min-height', '33vh')
+							as_quiz ? A2($elm$html$Html$Attributes$style, 'min-height', '33vh') : A2($elm$html$Html$Attributes$style, 'none', 'none')
 						]),
 					_List_fromArray(
 						[
@@ -14070,11 +15282,11 @@ var $author$project$Main$viewTargetGrossIncome = F2(
 							$elm$html$Html$h3,
 							_List_fromArray(
 								[
-									$elm$html$Html$Attributes$class('text-xl text-center uppercase font-bold')
+									$elm$html$Html$Attributes$class('text-xl text-center font-bold')
 								]),
 							_List_fromArray(
 								[
-									$elm$html$Html$text('Gross Target Annual Income')
+									$elm$html$Html$text('What is you desired gross annual income in retirement?')
 								])),
 							A2(
 							$elm$html$Html$div,
@@ -14107,7 +15319,7 @@ var $author$project$Main$viewTargetGrossIncome = F2(
 									$elm$html$Html$button,
 									_List_fromArray(
 										[
-											$elm$html$Html$Events$onClick($author$project$Main$ToggleAnsweredFactorInSocialSec),
+											$elm$html$Html$Events$onClick($author$project$Main$ToggleHasAnsweredNumPeople),
 											$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
 											A2($elm$html$Html$Attributes$style, 'background-color', '#333333')
 										]),
@@ -14139,512 +15351,316 @@ var $author$project$Main$viewTargetGrossIncome = F2(
 				]));
 	});
 var $author$project$Main$viewQuiz = function (model) {
-	return (!model.quiz.answered_num_people) ? A2(
+	return A2(
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
-				A2($elm$html$Html$Attributes$style, 'min-height', '75vh'),
-				A2($elm$html$Html$Attributes$style, 'max-height', '75vh'),
-				$elm$html$Html$Attributes$class('flex items-center')
+				$elm$html$Html$Attributes$class('w-full')
 			]),
 		_List_fromArray(
 			[
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-around items-center md:mx-auto mx-8 my-3 bg-white'),
-						A2($elm$html$Html$Attributes$style, 'min-height', '33vh')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$h3,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('text-xl text-center font-bold')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('How many people will be on your plan?')
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$div,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('flex flex-row')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$elm$html$Html$input,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$type_('radio'),
-												$elm$html$Html$Attributes$value('1'),
-												$elm$html$Html$Attributes$checked(model.quiz.plan_for_1_person_is_selected),
-												$elm$html$Html$Events$onInput($author$project$Main$ToggleNumberOfPeopleOnPlan)
-											]),
-										_List_Nil),
-										A2(
-										$elm$html$Html$div,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('mx-2 font-bold')
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text('1')
-											]))
-									])),
-								A2(
-								$elm$html$Html$div,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('flex flex-row')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$elm$html$Html$input,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$type_('radio'),
-												$elm$html$Html$Attributes$value('2'),
-												$elm$html$Html$Attributes$checked(model.quiz.plan_for_2_people_is_selected),
-												$elm$html$Html$Events$onInput($author$project$Main$ToggleNumberOfPeopleOnPlan)
-											]),
-										_List_Nil),
-										A2(
-										$elm$html$Html$div,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('mx-2 font-bold')
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text('2')
-											]))
-									]))
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('w-full flex justify-center pt-6'),
-								A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #333333')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick($author$project$Main$ToggleHasAnsweredNumPeople),
-										$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
-										A2($elm$html$Html$Attributes$style, 'background-color', '#7F6126')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Next')
-									]))
-							]))
-					]))
-			])) : ((!model.quiz.answered_factor_in_social_sec) ? A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				A2($elm$html$Html$Attributes$style, 'min-height', '75vh'),
-				A2($elm$html$Html$Attributes$style, 'max-height', '75vh'),
-				$elm$html$Html$Attributes$class('flex items-center')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-around items-center bg-white md:mx-auto mx-8 my-3 '),
-						A2($elm$html$Html$Attributes$style, 'min-height', '33vh')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$h3,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('text-xl text-center font-bold')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Do you want to factor in social security?')
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_Nil,
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$div,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('flex flex-row')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$elm$html$Html$input,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$type_('radio'),
-												$elm$html$Html$Attributes$value('true'),
-												$elm$html$Html$Attributes$checked(model.quiz.factor_in_social_sec),
-												$elm$html$Html$Events$onInput($author$project$Main$ToggleFactorInSocialSecurity)
-											]),
-										_List_Nil),
-										A2(
-										$elm$html$Html$div,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('mx-2 font-bold')
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text('Yes')
-											]))
-									])),
-								A2(
-								$elm$html$Html$div,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('flex flex-row')
-									]),
-								_List_fromArray(
-									[
-										A2(
-										$elm$html$Html$input,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$type_('radio'),
-												$elm$html$Html$Attributes$value('false'),
-												$elm$html$Html$Attributes$checked(!model.quiz.factor_in_social_sec),
-												$elm$html$Html$Events$onInput($author$project$Main$ToggleFactorInSocialSecurity)
-											]),
-										_List_Nil),
-										A2(
-										$elm$html$Html$div,
-										_List_fromArray(
-											[
-												$elm$html$Html$Attributes$class('mx-2 font-bold')
-											]),
-										_List_fromArray(
-											[
-												$elm$html$Html$text('No')
-											]))
-									]))
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('w-full flex justify-center pt-6'),
-								A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #333333')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick($author$project$Main$ToggleHasAnsweredNumPeople),
-										$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
-										A2($elm$html$Html$Attributes$style, 'background-color', '#333333')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Back')
-									])),
-								A2(
-								$elm$html$Html$button,
-								_List_fromArray(
-									[
-										$elm$html$Html$Events$onClick($author$project$Main$HasAnsweredFactorInSocialSecurity),
-										$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
-										A2($elm$html$Html$Attributes$style, 'background-color', '#7F6126')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Next')
-									]))
-							]))
-					]))
-			])) : ((!model.quiz.gross_target_income) ? A2($author$project$Main$viewTargetGrossIncome, model, true) : ((!model.quiz.date_of_birth) ? A3($author$project$Main$viewPersonDateOfBirth, model, true, model.quiz.factor_in_social_sec) : ((!model.quiz.answered_factor_in_other_income) ? A2(
-		$elm$html$Html$div,
-		_List_fromArray(
-			[
-				$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-center items-center bg-gray-500 md:mx-auto mx-8 my-3 rounded-lg')
-			]),
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$h3,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('text-xl text-white text-center font-bold')
-					]),
-				_List_fromArray(
-					[
-						$elm$html$Html$text('Do you have any other income streams?')
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('flex flex-row')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$input,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$type_('radio'),
-										$elm$html$Html$Attributes$value('true'),
-										$elm$html$Html$Attributes$checked(model.quiz.factor_in_other_income),
-										$elm$html$Html$Events$onInput($author$project$Main$ToggleFactorInOtherIncome)
-									]),
-								_List_Nil),
-								A2(
-								$elm$html$Html$div,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('mx-2 text-white font-bold')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('Yes')
-									]))
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('flex flex-row')
-							]),
-						_List_fromArray(
-							[
-								A2(
-								$elm$html$Html$input,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$type_('radio'),
-										$elm$html$Html$Attributes$value('false'),
-										$elm$html$Html$Attributes$checked(!model.quiz.factor_in_other_income),
-										$elm$html$Html$Events$onInput($author$project$Main$ToggleFactorInOtherIncome)
-									]),
-								_List_Nil),
-								A2(
-								$elm$html$Html$div,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$class('mx-2 text-white font-bold')
-									]),
-								_List_fromArray(
-									[
-										$elm$html$Html$text('No')
-									]))
-							]))
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('flex')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick($author$project$Main$ToggleAnsweredDateOfBirth),
-								$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Back')
-							])),
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick($author$project$Main$HasAnsweredFactorInOtherIncome),
-								$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Next')
-							]))
-					]))
-			])) : (((!model.quiz.other_income) && model.quiz.factor_in_other_income) ? A2($author$project$Main$viewOtherIncome, model, true) : A2(
-		$elm$html$Html$div,
-		_List_Nil,
-		_List_fromArray(
-			[
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-center items-center bg-gray-500 md:mx-auto mx-8 my-3 rounded-lg')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$h3,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('uppercase text-center w-full font-bold text-white text-2xl')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('summary')
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('uppercase text-white w-full text-center mt-3')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('To meet your annual goal of :')
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('uppercase text-green-900 w-full text-center font-bold text-xl')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text(
-								$author$project$Main$formatFloatAsDollar(model.target_gross_income))
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('uppercase text-white w-full text-center mt-3')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('You need :')
-							])),
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('uppercase text-green-900 w-full text-center font-bold text-xl ')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text(
-								$author$project$Main$formatIntAsDollarShowZero(model.required_starting_assets))
-							]))
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('m-4 flex flex-col md:flex-row justify-center items-center')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$div,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$class('mx-2 text-2xl')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('Please send any issues/bugs to:')
-							])),
-						A2(
-						$elm$html$Html$a,
-						_List_fromArray(
-							[
-								$elm$html$Html$Attributes$href('mailto:mac.farnsworth@live.com?subject=BUCKETLIST%20TICKET&body=Please%20include%20screenshots%20and%20an%20explanation%20of%20the%20issue'),
-								$elm$html$Html$Attributes$class('text-2xl text-red-900')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text('mac.farnsworth@live.com')
-							]))
-					])),
-				A2(
-				$elm$html$Html$div,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$class('w-full flex justify-center')
-					]),
-				_List_fromArray(
-					[
-						A2(
-						$elm$html$Html$button,
-						_List_fromArray(
-							[
-								$elm$html$Html$Events$onClick($author$project$Main$ToggleFullCalculator),
-								$elm$html$Html$Attributes$class('text-sm uppercase m-2 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded self-center')
-							]),
-						_List_fromArray(
-							[
-								$elm$html$Html$text(
-								model.show_full_calculator ? 'Hide Your Inputs' : 'Click here to adjust your answers')
-							]))
-					])),
-				model.show_full_calculator ? A2(
-				$elm$html$Html$div,
-				_List_Nil,
-				_List_fromArray(
-					[
-						$author$project$Main$viewPlanType(model),
-						A2($author$project$Main$viewTargetGrossIncome, model, false),
-						A3($author$project$Main$viewPersonDateOfBirth, model, false, model.quiz.factor_in_social_sec),
-						A2($author$project$Main$viewOtherIncome, model, false)
-					])) : A2(
+				model.quiz.has_answered_all_quiz ? A2(
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$class('hidden')
 					]),
-				_List_Nil),
-				$author$project$Main$viewTable(model)
-			])))))));
+				_List_Nil) : $author$project$Main$viewProgressBar(model),
+				(!model.quiz.answered_num_people) ? A2($author$project$Main$viewNumberOfPeople, model, true) : ((!model.quiz.gross_target_income) ? A2($author$project$Main$viewTargetGrossIncome, model, true) : ((!model.quiz.answered_factor_in_social_sec) ? A2($author$project$Main$viewFactorInSocialSec, model, true) : ((!model.quiz.date_of_birth) ? A3($author$project$Main$viewPersonDateOfBirth, model, true, model.quiz.factor_in_social_sec) : ((!model.quiz.answered_factor_in_other_income) ? A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						A2($elm$html$Html$Attributes$style, 'min-height', '75vh'),
+						A2($elm$html$Html$Attributes$style, 'max-height', '75vh'),
+						$elm$html$Html$Attributes$class('flex items-center')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-around items-center bg-white md:mx-auto mx-8 my-3 '),
+								A2($elm$html$Html$Attributes$style, 'min-height', '33vh')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$h3,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('text-xl text-center font-bold')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('Do you have any other income streams?')
+									])),
+								A2(
+								$elm$html$Html$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$div,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('flex flex-row')
+											]),
+										_List_fromArray(
+											[
+												A2(
+												$elm$html$Html$input,
+												_List_fromArray(
+													[
+														$elm$html$Html$Attributes$type_('radio'),
+														$elm$html$Html$Attributes$value('true'),
+														$elm$html$Html$Attributes$checked(model.quiz.factor_in_other_income),
+														$elm$html$Html$Events$onInput($author$project$Main$ToggleFactorInOtherIncome)
+													]),
+												_List_Nil),
+												A2(
+												$elm$html$Html$div,
+												_List_fromArray(
+													[
+														$elm$html$Html$Attributes$class('mx-2 font-bold')
+													]),
+												_List_fromArray(
+													[
+														$elm$html$Html$text('Yes')
+													]))
+											])),
+										A2(
+										$elm$html$Html$div,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('flex flex-row')
+											]),
+										_List_fromArray(
+											[
+												A2(
+												$elm$html$Html$input,
+												_List_fromArray(
+													[
+														$elm$html$Html$Attributes$type_('radio'),
+														$elm$html$Html$Attributes$value('false'),
+														$elm$html$Html$Attributes$checked(!model.quiz.factor_in_other_income),
+														$elm$html$Html$Events$onInput($author$project$Main$ToggleFactorInOtherIncome)
+													]),
+												_List_Nil),
+												A2(
+												$elm$html$Html$div,
+												_List_fromArray(
+													[
+														$elm$html$Html$Attributes$class('mx-2 font-bold')
+													]),
+												_List_fromArray(
+													[
+														$elm$html$Html$text('No')
+													]))
+											]))
+									])),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('w-full flex justify-center pt-6'),
+										A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #333333')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$button,
+										_List_fromArray(
+											[
+												$elm$html$Html$Events$onClick($author$project$Main$ToggleAnsweredDateOfBirth),
+												$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
+												A2($elm$html$Html$Attributes$style, 'background-color', '#333333')
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text('Back')
+											])),
+										A2(
+										$elm$html$Html$button,
+										_List_fromArray(
+											[
+												$elm$html$Html$Events$onClick($author$project$Main$HasAnsweredFactorInOtherIncome),
+												$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
+												A2($elm$html$Html$Attributes$style, 'background-color', '#7F6126')
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text('Next')
+											]))
+									]))
+							]))
+					])) : (((!model.quiz.other_income) && model.quiz.factor_in_other_income) ? A2($author$project$Main$viewOtherIncome, model, true) : A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						A2($elm$html$Html$Attributes$style, 'background-color', '#333333'),
+						$elm$html$Html$Attributes$class('mt-0')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('w-full p-12'),
+								A2($elm$html$Html$Attributes$style, 'background-image', 'url(\"assets/images/quiz-background.png\")'),
+								A2($elm$html$Html$Attributes$style, 'background-position-x', 'center'),
+								A2($elm$html$Html$Attributes$style, 'background-position-y', 'top')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('bg-white p-5 md:w-1/2 w-full flex flex-col justify-center items-center md:mx-auto mx-8 my-3 ')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$h3,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('uppercase text-center w-full font-bold text-2xl')
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text('summary')
+											])),
+										A2(
+										$elm$html$Html$div,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('uppercase w-full text-center mt-3')
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text('To meet your annual goal of :')
+											])),
+										A2(
+										$elm$html$Html$div,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('uppercase text-green-900 w-full text-center font-bold text-xl')
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text(
+												$author$project$Main$formatFloatAsDollar(model.target_gross_income))
+											])),
+										A2(
+										$elm$html$Html$div,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('uppercase w-full text-center mt-3')
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text('You need :')
+											])),
+										A2(
+										$elm$html$Html$div,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('uppercase text-green-900 w-full text-center font-bold text-xl ')
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text(
+												$author$project$Main$formatIntAsDollarShowZero(model.required_starting_assets))
+											]))
+									])),
+								A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('w-full flex justify-center')
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$button,
+										_List_fromArray(
+											[
+												$elm$html$Html$Events$onClick($author$project$Main$ToggleFullCalculator),
+												$elm$html$Html$Attributes$class('text-sm uppercase m-2 text-white font-bold py-2 px-3 self-center'),
+												A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+											]),
+										_List_fromArray(
+											[
+												$elm$html$Html$text(
+												model.show_full_calculator ? 'Hide Your Inputs' : 'Click here to adjust your answers')
+											]))
+									])),
+								model.show_full_calculator ? A2(
+								$elm$html$Html$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$author$project$Main$viewPlanType(model),
+										A2($author$project$Main$viewNumberOfPeople, model, false),
+										A2($author$project$Main$viewTargetGrossIncome, model, false),
+										A2($author$project$Main$viewFactorInSocialSec, model, false),
+										A3($author$project$Main$viewPersonDateOfBirth, model, false, model.quiz.factor_in_social_sec),
+										A2($author$project$Main$viewOtherIncome, model, false)
+									])) : A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('hidden')
+									]),
+								_List_Nil)
+							])),
+						$author$project$Main$viewTable(model)
+					])))))))
+			]));
 };
 var $author$project$Main$view = function (model) {
-	return A2(
+	return model.quiz.has_answered_all_quiz ? A2(
 		$elm$html$Html$div,
 		_List_fromArray(
 			[
 				$elm$html$Html$Attributes$class('min-h-screen absolute w-full bg-cover '),
+				A2($elm$html$Html$Attributes$style, 'background-color', '#333333')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						A2($elm$html$Html$Attributes$style, 'background-image', 'url(\"assets/images/quiz-background.png\")'),
+						A2($elm$html$Html$Attributes$style, 'background-position-x', 'center'),
+						A2($elm$html$Html$Attributes$style, 'background-position-y', 'bottom')
+					]),
+				_List_fromArray(
+					[
+						$author$project$Main$viewQuiz(model)
+					]))
+			])) : A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('min-h-screen absolute w-full bg-cover '),
+				A2($elm$html$Html$Attributes$style, 'background-color', '#333333'),
 				A2($elm$html$Html$Attributes$style, 'background-image', 'url(\"assets/images/quiz-background.png\")'),
 				A2($elm$html$Html$Attributes$style, 'background-position-x', 'center'),
 				A2($elm$html$Html$Attributes$style, 'background-position-y', 'bottom')
 			]),
 		_List_fromArray(
 			[
-				$author$project$Main$viewQuiz(model)
+				A2(
+				$elm$html$Html$div,
+				_List_Nil,
+				_List_fromArray(
+					[
+						$author$project$Main$viewQuiz(model)
+					]))
 			]));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(

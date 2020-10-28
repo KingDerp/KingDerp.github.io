@@ -10782,7 +10782,7 @@ var $elm$core$Array$repeat = F2(
 var $author$project$Main$init = function (_v0) {
 	var month = $elm$time$Time$Jan;
 	var max_age = 100;
-	var default_target_gross_income = 50000;
+	var default_target_gross_income = 0;
 	var default_age = 65;
 	var current_year = 2020;
 	var end_of_plan = A3($author$project$Main$calculateEndOfPlan, current_year, max_age, default_age);
@@ -10810,7 +10810,7 @@ var $author$project$Main$init = function (_v0) {
 			possible_birth_years: A2($elm$core$List$range, current_year - max_age, current_year),
 			possible_end_years: A2($elm$core$List$range, current_year - 1, end_of_plan),
 			possible_start_years: A2($elm$core$List$range, current_year, end_of_plan - 1),
-			quiz: {answered_factor_in_other_income: false, answered_factor_in_social_sec: false, answered_num_people: false, date_of_birth: false, factor_in_other_income: false, factor_in_social_sec: false, gross_target_income: false, has_answered_all_quiz: false, num_questions_answered: 0, other_income: false, plan_for_1_person_is_selected: true, plan_for_2_people_is_selected: false, social_sec_estimate: true},
+			quiz: {answered_factor_in_other_income: false, answered_factor_in_social_sec: false, answered_num_people: false, date_of_birth: false, factor_in_other_income: false, factor_in_social_sec: false, gross_target_income: false, has_answered_all_quiz: false, has_answered_get_started: false, num_questions_answered: 0, other_income: false, plan_for_1_person_is_selected: true, plan_for_2_people_is_selected: false, social_sec_estimate: true},
 			required_starting_assets: 0,
 			show_full_calculator: false,
 			social_security_growth_rate: 0.005,
@@ -11303,7 +11303,6 @@ var $author$project$Main$incomeFromAssetsUsingYearCOLAStartingIncome = F5(
 		var arr = A2($elm$core$Array$repeat, duration_of_agreement, target_gross_income);
 		return $elm$core$Array$isEmpty(arr) ? arr : A6($author$project$Main$incomeFromAssetsInit, 0, duration_of_agreement, starting_age, current_month, model, arr);
 	});
-var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Elm$JsArray$map = _JsArray_map;
 var $elm$core$Array$map = F2(
 	function (func, _v0) {
@@ -11467,11 +11466,6 @@ var $author$project$Main$positiveIntRegex = A2(
 	$elm$regex$Regex$fromString('^[1-9]\\d*$'));
 var $author$project$Main$validateAsPositiveInt = function (s) {
 	var clean_string = $author$project$Main$removeCommasAndDollarSigns(s);
-	var _v0 = A2($elm$core$Debug$log, 'string in', clean_string);
-	var _v1 = A2(
-		$elm$core$Debug$log,
-		'Error Status from String in',
-		(s === '') ? $author$project$Main$EmptyInput : (A2($elm$regex$Regex$contains, $author$project$Main$positiveIntRegex, s) ? $author$project$Main$None : $author$project$Main$PositiveIntOnly));
 	return (s === '') ? $author$project$Main$EmptyInput : (A2($elm$regex$Regex$contains, $author$project$Main$positiveIntRegex, clean_string) ? $author$project$Main$None : $author$project$Main$PositiveIntOnly);
 };
 var $author$project$Main$stringToFloatErrorTuple = F2(
@@ -11706,11 +11700,6 @@ var $author$project$Main$update = F2(
 					var t = A2($author$project$Main$stringToFloatErrorTuple, no_commas, $author$project$Main$buildTargetIncomeError);
 					var i = t.a;
 					var error = t.b;
-					var _v2 = A2($elm$core$Debug$log, '==============================================================================================', '');
-					var _v3 = A2($elm$core$Debug$log, 'String without formating ', s);
-					var _v4 = A2($elm$core$Debug$log, 'clean string', no_commas);
-					var _v5 = A2($elm$core$Debug$log, 'target_gross_income', i);
-					var _v6 = A2($elm$core$Debug$log, 'target_gross_income_as_string', t);
 					var $temp$msg = $author$project$Main$Calculate,
 						$temp$model = _Utils_update(
 						model,
@@ -11845,9 +11834,9 @@ var $author$project$Main$update = F2(
 						model.other_monthly_income_counter + 1,
 						$elm$core$String$toInt(id));
 					var found = function () {
-						var _v7 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
-						if (_v7.$ === 'Just') {
-							var val = _v7.a;
+						var _v2 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
+						if (_v2.$ === 'Just') {
+							var val = _v2.a;
 							return A3(
 								$elm$core$Dict$insert,
 								i,
@@ -11881,9 +11870,9 @@ var $author$project$Main$update = F2(
 					var error = t.b;
 					var converted_string_float = _Utils_eq(error.error_status, $author$project$Main$None) ? t.a : 0.0;
 					var found = function () {
-						var _v8 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
-						if (_v8.$ === 'Just') {
-							var val = _v8.a;
+						var _v3 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
+						if (_v3.$ === 'Just') {
+							var val = _v3.a;
 							return A3(
 								$elm$core$Dict$insert,
 								i,
@@ -11917,9 +11906,9 @@ var $author$project$Main$update = F2(
 						model.other_monthly_income_counter + 1,
 						$elm$core$String$toInt(id));
 					var found = function () {
-						var _v9 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
-						if (_v9.$ === 'Just') {
-							var val = _v9.a;
+						var _v4 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
+						if (_v4.$ === 'Just') {
+							var val = _v4.a;
 							return A3(
 								$elm$core$Dict$insert,
 								i,
@@ -11953,9 +11942,9 @@ var $author$project$Main$update = F2(
 						model.other_monthly_income_counter + 1,
 						$elm$core$String$toInt(id));
 					var found = function () {
-						var _v10 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
-						if (_v10.$ === 'Just') {
-							var val = _v10.a;
+						var _v5 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
+						if (_v5.$ === 'Just') {
+							var val = _v5.a;
 							return A3(
 								$elm$core$Dict$insert,
 								i,
@@ -11988,9 +11977,9 @@ var $author$project$Main$update = F2(
 						$elm$core$String$toInt(id));
 					var error = t.b;
 					var found = function () {
-						var _v11 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
-						if (_v11.$ === 'Just') {
-							var val = _v11.a;
+						var _v6 = A2($elm$core$Dict$get, i, model.other_monthly_incomes);
+						if (_v6.$ === 'Just') {
+							var val = _v6.a;
 							return A3(
 								$elm$core$Dict$insert,
 								i,
@@ -12253,8 +12242,18 @@ var $author$project$Main$update = F2(
 					var quiz = _Utils_update(
 						quiz_from_model,
 						{answered_num_people: !model.quiz.answered_num_people, num_questions_answered: num_questions_answered});
-					var _v12 = A2($elm$core$Debug$log, 'has answered in', model.quiz.answered_num_people);
-					var _v13 = A2($elm$core$Debug$log, 'num questions answered', model.quiz.num_questions_answered);
+					var $temp$msg = $author$project$Main$Calculate,
+						$temp$model = _Utils_update(
+						model,
+						{quiz: quiz});
+					msg = $temp$msg;
+					model = $temp$model;
+					continue update;
+				case 'HasClickedGetStarted':
+					var quiz_from_model = model.quiz;
+					var quiz = _Utils_update(
+						quiz_from_model,
+						{has_answered_get_started: true});
 					var $temp$msg = $author$project$Main$Calculate,
 						$temp$model = _Utils_update(
 						model,
@@ -12284,13 +12283,13 @@ var $author$project$Main$update = F2(
 							[
 								A2(
 								$elm$core$Task$perform,
-								function (_v14) {
+								function (_v7) {
 									return $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient1(model.client_1.social_security_monthly_income_as_string);
 								},
 								$elm$core$Task$succeed(true)),
 								A2(
 								$elm$core$Task$perform,
-								function (_v15) {
+								function (_v8) {
 									return $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient2(model.client_2.social_security_monthly_income_as_string);
 								},
 								$elm$core$Task$succeed(true))
@@ -12299,7 +12298,7 @@ var $author$project$Main$update = F2(
 							[
 								A2(
 								$elm$core$Task$perform,
-								function (_v16) {
+								function (_v9) {
 									return $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient1(model.client_1.social_security_monthly_income_as_string);
 								},
 								$elm$core$Task$succeed(true))
@@ -12308,7 +12307,7 @@ var $author$project$Main$update = F2(
 							[
 								A2(
 								$elm$core$Task$perform,
-								function (_v17) {
+								function (_v10) {
 									return $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient2(model.client_2.social_security_monthly_income_as_string);
 								},
 								$elm$core$Task$succeed(true))
@@ -12317,7 +12316,7 @@ var $author$project$Main$update = F2(
 							[
 								A2(
 								$elm$core$Task$perform,
-								function (_v18) {
+								function (_v11) {
 									return $author$project$Main$NoOp;
 								},
 								$elm$core$Task$succeed(true))
@@ -12326,7 +12325,7 @@ var $author$project$Main$update = F2(
 							[
 								A2(
 								$elm$core$Task$perform,
-								function (_v19) {
+								function (_v12) {
 									return $author$project$Main$UpdateSocialSecurityMontlhlyIncomeClient1(model.client_1.social_security_monthly_income_as_string);
 								},
 								$elm$core$Task$succeed(true))
@@ -12335,7 +12334,7 @@ var $author$project$Main$update = F2(
 							[
 								A2(
 								$elm$core$Task$perform,
-								function (_v20) {
+								function (_v13) {
 									return $author$project$Main$NoOp;
 								},
 								$elm$core$Task$succeed(true))
@@ -12477,7 +12476,7 @@ var $author$project$Main$formatIntAsDollarShowZero = function (i) {
 	var string_with_commas = A2($author$project$Main$addCommas, s, _List_Nil);
 	return '$' + string_with_commas;
 };
-var $elm$html$Html$h3 = _VirtualDom_node('h3');
+var $elm$html$Html$h4 = _VirtualDom_node('h4');
 var $author$project$Main$HasAnsweredFactorInSocialSecurity = {$: 'HasAnsweredFactorInSocialSecurity'};
 var $author$project$Main$ToggleFactorInSocialSecurity = function (a) {
 	return {$: 'ToggleFactorInSocialSecurity', a: a};
@@ -12506,7 +12505,7 @@ var $author$project$Main$viewFactorInSocialSec = F2(
 					_List_fromArray(
 						[
 							A2(
-							$elm$html$Html$h3,
+							$elm$html$Html$h4,
 							_List_fromArray(
 								[
 									$elm$html$Html$Attributes$class('text-xl text-center font-bold')
@@ -12583,7 +12582,7 @@ var $author$project$Main$viewFactorInSocialSec = F2(
 							$elm$html$Html$div,
 							_List_fromArray(
 								[
-									$elm$html$Html$Attributes$class('w-full flex justify-center pt-6'),
+									$elm$html$Html$Attributes$class('w-3/4 flex justify-center pt-6'),
 									A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #333333')
 								]),
 							_List_fromArray(
@@ -12638,7 +12637,7 @@ var $author$project$Main$viewNumberOfPeople = F2(
 			_List_fromArray(
 				[
 					A2(
-					$elm$html$Html$h3,
+					$elm$html$Html$h4,
 					_List_fromArray(
 						[
 							$elm$html$Html$Attributes$class('text-xl text-center font-bold')
@@ -12715,7 +12714,7 @@ var $author$project$Main$viewNumberOfPeople = F2(
 					$elm$html$Html$div,
 					_List_fromArray(
 						[
-							$elm$html$Html$Attributes$class('w-full flex justify-center pt-6'),
+							$elm$html$Html$Attributes$class('w-3/4 flex justify-center pt-6'),
 							A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #333333')
 						]),
 					_List_fromArray(
@@ -13061,7 +13060,7 @@ var $author$project$Main$viewOtherIncome = F2(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('w-full flex justify-center pt-6'),
+					$elm$html$Html$Attributes$class('w-3/4 flex justify-center pt-6'),
 					A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #333333')
 				]),
 			_List_fromArray(
@@ -13118,7 +13117,7 @@ var $author$project$Main$viewOtherIncome = F2(
 					_List_fromArray(
 						[
 							A2(
-							$elm$html$Html$h3,
+							$elm$html$Html$h4,
 							_List_fromArray(
 								[
 									$elm$html$Html$Attributes$class('text-xl text-center font-bold')
@@ -13167,7 +13166,7 @@ var $author$project$Main$viewOtherIncome = F2(
 						_List_fromArray(
 							[
 								A2(
-								$elm$html$Html$h3,
+								$elm$html$Html$h4,
 								_List_fromArray(
 									[
 										$elm$html$Html$Attributes$class('text-xl text-center font-bold')
@@ -13276,19 +13275,20 @@ var $author$project$Main$viewPerson1 = F3(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-around items-center bg-white md:mx-auto mx-8 my-3 ')
+					$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-around items-center bg-white md:mx-auto mx-8 my-3 '),
+					A2($elm$html$Html$Attributes$style, 'min-height', '33vh')
 				]),
 			_List_fromArray(
 				[
 					A2(
-					$elm$html$Html$h3,
+					$elm$html$Html$h4,
 					_List_fromArray(
 						[
 							$elm$html$Html$Attributes$class('text-xl text-center font-bold')
 						]),
 					_List_fromArray(
 						[
-							$elm$html$Html$text('Person 1')
+							$elm$html$Html$text('Individual 1')
 						])),
 					A2(
 					$elm$html$Html$div,
@@ -13314,7 +13314,7 @@ var $author$project$Main$viewPerson1 = F3(
 										]),
 									_List_fromArray(
 										[
-											$elm$html$Html$text('When is your date of birth?')
+											$elm$html$Html$text('What is your date of birth?')
 										])),
 									A2(
 									$elm$html$Html$div,
@@ -13329,7 +13329,8 @@ var $author$project$Main$viewPerson1 = F3(
 											_List_fromArray(
 												[
 													$elm$html$Html$Events$onInput($author$project$Main$UpdateSocialSecurityStartMonthClient1),
-													$elm$html$Html$Attributes$class('text-center w-24')
+													$elm$html$Html$Attributes$class('text-center w-24'),
+													A2($elm$html$Html$Attributes$style, 'height', '25px')
 												]),
 											_List_fromArray(
 												[
@@ -13471,7 +13472,8 @@ var $author$project$Main$viewPerson1 = F3(
 											_List_fromArray(
 												[
 													$elm$html$Html$Events$onInput($author$project$Main$UpdateBirthYearClient1),
-													$elm$html$Html$Attributes$class('ml-2 text-center w-24')
+													$elm$html$Html$Attributes$class('ml-2 text-center w-24'),
+													A2($elm$html$Html$Attributes$style, 'height', '25px')
 												]),
 											$author$project$Main$viewPossibleBirthYears(m))
 										]))
@@ -13507,7 +13509,8 @@ var $author$project$Main$viewPerson1 = F3(
 											_List_fromArray(
 												[
 													$elm$html$Html$Events$onInput($author$project$Main$UpdateSocialSecAgeClient1),
-													$elm$html$Html$Attributes$class('w-24 text-center')
+													$elm$html$Html$Attributes$class('w-24 text-center'),
+													A2($elm$html$Html$Attributes$style, 'height', '25px')
 												]),
 											_List_fromArray(
 												[
@@ -13688,7 +13691,7 @@ var $author$project$Main$viewPerson1 = F3(
 					$elm$html$Html$div,
 					_List_fromArray(
 						[
-							$elm$html$Html$Attributes$class('w-full flex justify-center pt-6'),
+							$elm$html$Html$Attributes$class('w-3/4 flex justify-center pt-6'),
 							A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #333333')
 						]),
 					_List_fromArray(
@@ -13745,14 +13748,14 @@ var $author$project$Main$viewPerson2 = F3(
 			_List_fromArray(
 				[
 					A2(
-					$elm$html$Html$h3,
+					$elm$html$Html$h4,
 					_List_fromArray(
 						[
 							$elm$html$Html$Attributes$class('text-xl text-center font-bold')
 						]),
 					_List_fromArray(
 						[
-							$elm$html$Html$text('Person 1')
+							$elm$html$Html$text('Individual 2')
 						])),
 					A2(
 					$elm$html$Html$div,
@@ -13778,7 +13781,7 @@ var $author$project$Main$viewPerson2 = F3(
 										]),
 									_List_fromArray(
 										[
-											$elm$html$Html$text('When is your date of birth?')
+											$elm$html$Html$text('What is your date of birth?')
 										])),
 									A2(
 									$elm$html$Html$div,
@@ -13793,7 +13796,8 @@ var $author$project$Main$viewPerson2 = F3(
 											_List_fromArray(
 												[
 													$elm$html$Html$Events$onInput($author$project$Main$UpdateSocialSecurityStartMonthClient2),
-													$elm$html$Html$Attributes$class('text-center w-24')
+													$elm$html$Html$Attributes$class('text-center w-24'),
+													A2($elm$html$Html$Attributes$style, 'height', '25px')
 												]),
 											_List_fromArray(
 												[
@@ -13935,7 +13939,8 @@ var $author$project$Main$viewPerson2 = F3(
 											_List_fromArray(
 												[
 													$elm$html$Html$Events$onInput($author$project$Main$UpdateBirthYearClient2),
-													$elm$html$Html$Attributes$class('ml-2 text-center w-24')
+													$elm$html$Html$Attributes$class('ml-2 text-center w-24'),
+													A2($elm$html$Html$Attributes$style, 'height', '25px')
 												]),
 											$author$project$Main$viewPossibleBirthYears(m))
 										]))
@@ -13971,7 +13976,8 @@ var $author$project$Main$viewPerson2 = F3(
 											_List_fromArray(
 												[
 													$elm$html$Html$Events$onInput($author$project$Main$UpdateSocialSecAgeClient2),
-													$elm$html$Html$Attributes$class('w-24 text-center')
+													$elm$html$Html$Attributes$class('w-24 text-center'),
+													A2($elm$html$Html$Attributes$style, 'height', '25px')
 												]),
 											_List_fromArray(
 												[
@@ -14140,7 +14146,7 @@ var $author$project$Main$viewPerson2 = F3(
 					$elm$html$Html$div,
 					_List_fromArray(
 						[
-							$elm$html$Html$Attributes$class('w-full flex justify-center pt-6'),
+							$elm$html$Html$Attributes$class('w-3/4 flex justify-center pt-6'),
 							A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #333333')
 						]),
 					_List_fromArray(
@@ -14218,7 +14224,7 @@ var $author$project$Main$viewPlanType = function (m) {
 		_List_fromArray(
 			[
 				A2(
-				$elm$html$Html$h3,
+				$elm$html$Html$h4,
 				_List_fromArray(
 					[
 						$elm$html$Html$Attributes$class('text-xl text-center font-bold')
@@ -14310,7 +14316,7 @@ var $author$project$Main$viewProgressBar = function (model) {
 						$elm$html$Html$div,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('w-3/4 flex')
+								$elm$html$Html$Attributes$class('w-1/4 flex')
 							]),
 						_List_fromArray(
 							[
@@ -14368,7 +14374,7 @@ var $author$project$Main$viewProgressBar = function (model) {
 						$elm$html$Html$div,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('w-3/4 flex')
+								$elm$html$Html$Attributes$class('w-1/4 flex')
 							]),
 						_List_fromArray(
 							[
@@ -14427,7 +14433,7 @@ var $author$project$Main$viewProgressBar = function (model) {
 						$elm$html$Html$div,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('w-3/4 flex')
+								$elm$html$Html$Attributes$class('w-1/4 flex')
 							]),
 						_List_fromArray(
 							[
@@ -14487,7 +14493,7 @@ var $author$project$Main$viewProgressBar = function (model) {
 						$elm$html$Html$div,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('w-3/4 flex')
+								$elm$html$Html$Attributes$class('w-1/4 flex')
 							]),
 						_List_fromArray(
 							[
@@ -14548,7 +14554,7 @@ var $author$project$Main$viewProgressBar = function (model) {
 						$elm$html$Html$div,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$class('w-3/4 flex')
+								$elm$html$Html$Attributes$class('w-1/4 flex')
 							]),
 						_List_fromArray(
 							[
@@ -15279,14 +15285,33 @@ var $author$project$Main$viewTargetGrossIncome = F2(
 					_List_fromArray(
 						[
 							A2(
-							$elm$html$Html$h3,
+							$elm$html$Html$h4,
 							_List_fromArray(
 								[
 									$elm$html$Html$Attributes$class('text-xl text-center font-bold')
 								]),
 							_List_fromArray(
 								[
-									$elm$html$Html$text('What is you desired gross annual income in retirement?')
+									A2(
+									$elm$html$Html$span,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('block')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('What is your desired gross annual')
+										])),
+									A2(
+									$elm$html$Html$span,
+									_List_fromArray(
+										[
+											$elm$html$Html$Attributes$class('block')
+										]),
+									_List_fromArray(
+										[
+											$elm$html$Html$text('income in retirment?')
+										]))
 								])),
 							A2(
 							$elm$html$Html$div,
@@ -15300,7 +15325,7 @@ var $author$project$Main$viewTargetGrossIncome = F2(
 											$elm$html$Html$Events$onInput($author$project$Main$UpdateStartingIncome),
 											$elm$html$Html$Attributes$class('my-2 mx-0 w-full text-center font-bold'),
 											A2($elm$html$Html$Attributes$style, 'border', '2px solid #1A4C31'),
-											$elm$html$Html$Attributes$value(
+											(m.target_gross_income_as_string === '0') ? $elm$html$Html$Attributes$value('$0') : $elm$html$Html$Attributes$value(
 											$author$project$Main$formatStringAsDollar(m.target_gross_income_as_string))
 										]),
 									_List_Nil)
@@ -15310,7 +15335,7 @@ var $author$project$Main$viewTargetGrossIncome = F2(
 							$elm$html$Html$div,
 							_List_fromArray(
 								[
-									$elm$html$Html$Attributes$class('w-full flex justify-center pt-6'),
+									$elm$html$Html$Attributes$class('w-3/4 flex justify-center pt-6'),
 									A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #333333')
 								]),
 							_List_fromArray(
@@ -15350,6 +15375,80 @@ var $author$project$Main$viewTargetGrossIncome = F2(
 						]))
 				]));
 	});
+var $author$project$Main$HasClickedGetStarted = {$: 'HasClickedGetStarted'};
+var $author$project$Main$viewWelcome = function (model) {
+	var welcome = A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				$elm$html$Html$Attributes$class('p-5 md:w-1/2 w-full flex flex-col justify-around items-center md:mx-auto mx-8 my-3 bg-white'),
+				A2($elm$html$Html$Attributes$style, 'min-height', '33vh')
+			]),
+		_List_fromArray(
+			[
+				A2(
+				$elm$html$Html$h4,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('text-xl text-center font-bold')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('block')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Welcome!')
+							])),
+						A2(
+						$elm$html$Html$span,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('block')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Please click the button below to begin your retirment planning.')
+							]))
+					])),
+				A2(
+				$elm$html$Html$div,
+				_List_fromArray(
+					[
+						$elm$html$Html$Attributes$class('w-3/4 flex justify-center pt-6'),
+						A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #333333')
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick($author$project$Main$HasClickedGetStarted),
+								$elm$html$Html$Attributes$class('text-sm uppercase m-2 hover:bg-blue-700 text-white font-bold py-2 px-3 self-center w-40'),
+								A2($elm$html$Html$Attributes$style, 'background-color', '#7F6126')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Get Started')
+							]))
+					]))
+			]));
+	return A2(
+		$elm$html$Html$div,
+		_List_fromArray(
+			[
+				A2($elm$html$Html$Attributes$style, 'min-height', '75vh'),
+				A2($elm$html$Html$Attributes$style, 'max-height', '75vh'),
+				$elm$html$Html$Attributes$class('flex items-center')
+			]),
+		_List_fromArray(
+			[welcome]));
+};
 var $author$project$Main$viewQuiz = function (model) {
 	return A2(
 		$elm$html$Html$div,
@@ -15366,7 +15465,7 @@ var $author$project$Main$viewQuiz = function (model) {
 						$elm$html$Html$Attributes$class('hidden')
 					]),
 				_List_Nil) : $author$project$Main$viewProgressBar(model),
-				(!model.quiz.answered_num_people) ? A2($author$project$Main$viewNumberOfPeople, model, true) : ((!model.quiz.gross_target_income) ? A2($author$project$Main$viewTargetGrossIncome, model, true) : ((!model.quiz.answered_factor_in_social_sec) ? A2($author$project$Main$viewFactorInSocialSec, model, true) : ((!model.quiz.date_of_birth) ? A3($author$project$Main$viewPersonDateOfBirth, model, true, model.quiz.factor_in_social_sec) : ((!model.quiz.answered_factor_in_other_income) ? A2(
+				(!model.quiz.has_answered_get_started) ? $author$project$Main$viewWelcome(model) : ((!model.quiz.answered_num_people) ? A2($author$project$Main$viewNumberOfPeople, model, true) : ((!model.quiz.gross_target_income) ? A2($author$project$Main$viewTargetGrossIncome, model, true) : ((!model.quiz.answered_factor_in_social_sec) ? A2($author$project$Main$viewFactorInSocialSec, model, true) : ((!model.quiz.date_of_birth) ? A3($author$project$Main$viewPersonDateOfBirth, model, true, model.quiz.factor_in_social_sec) : ((!model.quiz.answered_factor_in_other_income) ? A2(
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
@@ -15386,7 +15485,7 @@ var $author$project$Main$viewQuiz = function (model) {
 						_List_fromArray(
 							[
 								A2(
-								$elm$html$Html$h3,
+								$elm$html$Html$h4,
 								_List_fromArray(
 									[
 										$elm$html$Html$Attributes$class('text-xl text-center font-bold')
@@ -15463,7 +15562,7 @@ var $author$project$Main$viewQuiz = function (model) {
 								$elm$html$Html$div,
 								_List_fromArray(
 									[
-										$elm$html$Html$Attributes$class('w-full flex justify-center pt-6'),
+										$elm$html$Html$Attributes$class('w-3/4 flex justify-center pt-6'),
 										A2($elm$html$Html$Attributes$style, 'border-top', '1px solid #333333')
 									]),
 								_List_fromArray(
@@ -15508,7 +15607,7 @@ var $author$project$Main$viewQuiz = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$class('w-full p-12'),
-								A2($elm$html$Html$Attributes$style, 'background-image', 'url(\"assets/images/quiz-background.png\")'),
+								A2($elm$html$Html$Attributes$style, 'background-image', 'url(\"https://www.deckerretirementplanning.com/wp-content/uploads/2020/10/quiz-background.png\")'),
 								A2($elm$html$Html$Attributes$style, 'background-position-x', 'center'),
 								A2($elm$html$Html$Attributes$style, 'background-position-y', 'top')
 							]),
@@ -15523,14 +15622,15 @@ var $author$project$Main$viewQuiz = function (model) {
 								_List_fromArray(
 									[
 										A2(
-										$elm$html$Html$h3,
+										$elm$html$Html$h4,
 										_List_fromArray(
 											[
-												$elm$html$Html$Attributes$class('uppercase text-center w-full font-bold text-2xl')
+												$elm$html$Html$Attributes$class('uppercase text-center w-full font-bold text-2xl'),
+												A2($elm$html$Html$Attributes$style, 'color', '#1A4C31')
 											]),
 										_List_fromArray(
 											[
-												$elm$html$Html$text('summary')
+												$elm$html$Html$text('YOUR RESULTS')
 											])),
 										A2(
 										$elm$html$Html$div,
@@ -15561,7 +15661,7 @@ var $author$project$Main$viewQuiz = function (model) {
 											]),
 										_List_fromArray(
 											[
-												$elm$html$Html$text('You need :')
+												$elm$html$Html$text('You will need :')
 											])),
 										A2(
 										$elm$html$Html$div,
@@ -15589,7 +15689,7 @@ var $author$project$Main$viewQuiz = function (model) {
 											[
 												$elm$html$Html$Events$onClick($author$project$Main$ToggleFullCalculator),
 												$elm$html$Html$Attributes$class('text-sm uppercase m-2 text-white font-bold py-2 px-3 self-center'),
-												A2($elm$html$Html$Attributes$style, 'background-color', '#1A4C31')
+												A2($elm$html$Html$Attributes$style, 'background-color', '#7F6126')
 											]),
 										_List_fromArray(
 											[
@@ -15617,7 +15717,7 @@ var $author$project$Main$viewQuiz = function (model) {
 								_List_Nil)
 							])),
 						$author$project$Main$viewTable(model)
-					])))))))
+					]))))))))
 			]));
 };
 var $author$project$Main$view = function (model) {
@@ -15634,7 +15734,7 @@ var $author$project$Main$view = function (model) {
 				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						A2($elm$html$Html$Attributes$style, 'background-image', 'url(\"assets/images/quiz-background.png\")'),
+						A2($elm$html$Html$Attributes$style, 'background-image', 'url(\"https://www.deckerretirementplanning.com/wp-content/uploads/2020/10/quiz-background.png\")'),
 						A2($elm$html$Html$Attributes$style, 'background-position-x', 'center'),
 						A2($elm$html$Html$Attributes$style, 'background-position-y', 'bottom')
 					]),
@@ -15648,7 +15748,7 @@ var $author$project$Main$view = function (model) {
 			[
 				$elm$html$Html$Attributes$class('min-h-screen absolute w-full bg-cover '),
 				A2($elm$html$Html$Attributes$style, 'background-color', '#333333'),
-				A2($elm$html$Html$Attributes$style, 'background-image', 'url(\"assets/images/quiz-background.png\")'),
+				A2($elm$html$Html$Attributes$style, 'background-image', 'url(\"https://www.deckerretirementplanning.com/wp-content/uploads/2020/10/quiz-background.png\")'),
 				A2($elm$html$Html$Attributes$style, 'background-position-x', 'center'),
 				A2($elm$html$Html$Attributes$style, 'background-position-y', 'bottom')
 			]),
@@ -15666,4 +15766,4 @@ var $author$project$Main$view = function (model) {
 var $author$project$Main$main = $elm$browser$Browser$element(
 	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{},"unions":{"Main.Msg":{"args":[],"tags":{"Calculate":[],"InsertNewIncome":[],"DeleteIncome":["String.String"],"UpdateStartingIncome":["String.String"],"UpdateStartingIncomeAsQuiz":["String.String"],"UpdateSocialSecAgeClient1":["String.String"],"UpdateSocialSecAgeClient2":["String.String"],"UpdateSocialSecurityMontlhlyIncomeClient1":["String.String"],"UpdateSocialSecurityMontlhlyIncomeClient2":["String.String"],"UpdateOtherIncomeName":["String.String","String.String"],"UpdateOtherMonthlyIncome":["String.String","String.String"],"UpdateStartYear":["String.String","String.String"],"UpdateEndYear":["String.String","String.String"],"UpdateAnnualGrowthPercentage":["String.String","String.String"],"UpdateSocialSecurityStartMonthClient1":["String.String"],"UpdateSocialSecurityStartMonthClient2":["String.String"],"UpdateBirthYearClient1":["String.String"],"UpdateBirthYearClient2":["String.String"],"Now":["Time.Posix"],"ToggleClient2":[],"TogglePlanType":["String.String"],"ToggleNumberOfPeopleOnPlan":["String.String"],"ToggleFactorInSocialSecurity":["String.String"],"ToggleFactorInOtherIncome":["String.String"],"ToggleHasAnsweredNumPeople":[],"PersonBirthdayAndSocialErrorCheck":["String.String","String.String"],"ToggleAnsweredDateOfBirth":[],"HasAnsweredOtherIncome":[],"HasAnsweredFactorInSocialSecurity":[],"ToggleAnsweredFactorInSocialSec":[],"HasAnsweredFactorInOtherIncome":[],"ToggleFullCalculator":[],"NoOp":[],"ToggleGrossTargetIncome":[],"ToggleAnsweredFactorInOtherIncome":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"String.String":{"args":[],"tags":{"String":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}}}}})}});}(this));
+	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{},"unions":{"Main.Msg":{"args":[],"tags":{"Calculate":[],"InsertNewIncome":[],"DeleteIncome":["String.String"],"UpdateStartingIncome":["String.String"],"UpdateStartingIncomeAsQuiz":["String.String"],"UpdateSocialSecAgeClient1":["String.String"],"UpdateSocialSecAgeClient2":["String.String"],"UpdateSocialSecurityMontlhlyIncomeClient1":["String.String"],"UpdateSocialSecurityMontlhlyIncomeClient2":["String.String"],"UpdateOtherIncomeName":["String.String","String.String"],"UpdateOtherMonthlyIncome":["String.String","String.String"],"UpdateStartYear":["String.String","String.String"],"UpdateEndYear":["String.String","String.String"],"UpdateAnnualGrowthPercentage":["String.String","String.String"],"UpdateSocialSecurityStartMonthClient1":["String.String"],"UpdateSocialSecurityStartMonthClient2":["String.String"],"UpdateBirthYearClient1":["String.String"],"UpdateBirthYearClient2":["String.String"],"Now":["Time.Posix"],"ToggleClient2":[],"TogglePlanType":["String.String"],"ToggleNumberOfPeopleOnPlan":["String.String"],"ToggleFactorInSocialSecurity":["String.String"],"ToggleFactorInOtherIncome":["String.String"],"ToggleHasAnsweredNumPeople":[],"HasClickedGetStarted":[],"PersonBirthdayAndSocialErrorCheck":["String.String","String.String"],"ToggleAnsweredDateOfBirth":[],"HasAnsweredOtherIncome":[],"HasAnsweredFactorInSocialSecurity":[],"ToggleAnsweredFactorInSocialSec":[],"HasAnsweredFactorInOtherIncome":[],"ToggleFullCalculator":[],"NoOp":[],"ToggleGrossTargetIncome":[],"ToggleAnsweredFactorInOtherIncome":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"String.String":{"args":[],"tags":{"String":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}}}}})}});}(this));

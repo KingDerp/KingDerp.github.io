@@ -10790,7 +10790,9 @@ var $author$project$Main$init = function (_v0) {
 		{
 			buckets: $elm$core$Array$empty,
 			client_1: $author$project$Main$defaultClientData,
-			client_2: $author$project$Main$defaultClientData,
+			client_2: _Utils_update(
+				$author$project$Main$defaultClientData,
+				{birth_month: 11}),
 			client_2_exists: false,
 			cola_after_70_and_before_80: 0.01,
 			cola_after_80: 0.005,
@@ -10807,6 +10809,7 @@ var $author$project$Main$init = function (_v0) {
 			other_monthly_incomes: $elm$core$Dict$empty,
 			plan_3_is_selected: true,
 			plan_5_is_selected: false,
+			plan_modal_is_visible: false,
 			possible_birth_years: A2($elm$core$List$range, current_year - max_age, current_year),
 			possible_end_years: A2($elm$core$List$range, current_year - 1, end_of_plan),
 			possible_start_years: A2($elm$core$List$range, current_year, end_of_plan - 1),
@@ -11303,6 +11306,7 @@ var $author$project$Main$incomeFromAssetsUsingYearCOLAStartingIncome = F5(
 		var arr = A2($elm$core$Array$repeat, duration_of_agreement, target_gross_income);
 		return $elm$core$Array$isEmpty(arr) ? arr : A6($author$project$Main$incomeFromAssetsInit, 0, duration_of_agreement, starting_age, current_month, model, arr);
 	});
+var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Elm$JsArray$map = _JsArray_map;
 var $elm$core$Array$map = F2(
 	function (func, _v0) {
@@ -11502,7 +11506,7 @@ var $author$project$Main$MalformedPercent = {$: 'MalformedPercent'};
 var $author$project$Main$floatAsPercent = A2(
 	$elm$core$Maybe$withDefault,
 	$elm$regex$Regex$never,
-	$elm$regex$Regex$fromString('^([0-1]|100|[1-9]{1}[0-9]{1}|([0-9]{1}|[1-9]{1}[0-9]{1})?\\.{1}[0-9]{1,9})\\%?$'));
+	$elm$regex$Regex$fromString('^(0|1|2|3|4|5|6|7|8|9|100|[1-9]{1}[0-9]{1}|([0-9]{1}|[1-9]{1}[0-9]{1})?\\.{1}[0-9]{1,9})\\%?$'));
 var $author$project$Main$validateFloatAsPercent = function (s) {
 	return (s === '') ? $author$project$Main$EmptyInput : (A2($elm$regex$Regex$contains, $author$project$Main$floatAsPercent, s) ? $author$project$Main$None : $author$project$Main$MalformedPercent);
 };
@@ -12423,8 +12427,15 @@ var $author$project$Main$update = F2(
 					msg = $temp$msg;
 					model = $temp$model;
 					continue update;
-				default:
+				case 'NoOp':
 					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				default:
+					var _v11 = A2($elm$core$Debug$log, 'harpo harpo', 'harpo');
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{plan_modal_is_visible: !model.plan_modal_is_visible}),
+						$elm$core$Platform$Cmd$none);
 			}
 		}
 	});
@@ -13202,7 +13213,7 @@ var $author$project$Main$viewOtherIncomeRow = F2(
 										]),
 									_List_fromArray(
 										[
-											$elm$html$Html$text('Growth')
+											$elm$html$Html$text('Growth %')
 										])),
 									A2(
 									$elm$html$Html$input,
@@ -13526,12 +13537,89 @@ var $author$project$Main$UpdateSocialSecAgeClient1 = function (a) {
 var $author$project$Main$UpdateSocialSecurityStartMonthClient1 = function (a) {
 	return {$: 'UpdateSocialSecurityStartMonthClient1', a: a};
 };
-var $author$project$Main$viewPossibleBirthYears = function (m) {
-	return $elm$core$List$reverse(
-		A2(
+var $author$project$Main$intToMonthStr = function (i) {
+	switch (i) {
+		case 1:
+			return 'January';
+		case 2:
+			return 'February';
+		case 3:
+			return 'March';
+		case 4:
+			return 'April';
+		case 5:
+			return 'May';
+		case 6:
+			return 'June';
+		case 7:
+			return 'July';
+		case 8:
+			return 'August';
+		case 9:
+			return 'September';
+		case 10:
+			return 'October';
+		case 11:
+			return 'November';
+		case 12:
+			return 'December';
+		default:
+			return 'Not a real month';
+	}
+};
+var $elm$html$Html$Attributes$selected = $elm$html$Html$Attributes$boolProperty('selected');
+var $author$project$Main$viewPossibleBirthYears = F2(
+	function (m, birth_year) {
+		return $elm$core$List$reverse(
+			A2(
+				$elm$core$List$map,
+				function (x) {
+					return _Utils_eq(birth_year, x) ? A2(
+						$elm$html$Html$option,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$selected(true),
+								$elm$html$Html$Attributes$value(
+								$elm$core$String$fromInt(x))
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(
+								$elm$core$String$fromInt(x))
+							])) : A2(
+						$elm$html$Html$option,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$value(
+								$elm$core$String$fromInt(x))
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text(
+								$elm$core$String$fromInt(x))
+							]));
+				},
+				m.possible_birth_years));
+	});
+var $author$project$Main$viewPerson1 = F3(
+	function (m, as_quiz, factor_in_social_sec) {
+		var months = A2($elm$core$List$range, 1, 12);
+		var birth_month_options = A2(
 			$elm$core$List$map,
 			function (x) {
-				return A2(
+				return _Utils_eq(m.client_1.birth_month, x) ? A2(
+					$elm$html$Html$option,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$selected(true),
+							$elm$html$Html$Attributes$value(
+							$elm$core$String$fromInt(x))
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$author$project$Main$intToMonthStr(x))
+						])) : A2(
 					$elm$html$Html$option,
 					_List_fromArray(
 						[
@@ -13541,13 +13629,10 @@ var $author$project$Main$viewPossibleBirthYears = function (m) {
 					_List_fromArray(
 						[
 							$elm$html$Html$text(
-							$elm$core$String$fromInt(x))
+							$author$project$Main$intToMonthStr(x))
 						]));
 			},
-			m.possible_birth_years));
-};
-var $author$project$Main$viewPerson1 = F3(
-	function (m, as_quiz, factor_in_social_sec) {
+			months);
 		return as_quiz ? $author$project$Main$viewStandardQuizQuestion(
 			_List_fromArray(
 				[
@@ -13603,141 +13688,7 @@ var $author$project$Main$viewPerson1 = F3(
 											$elm$html$Html$Attributes$class('text-center w-24'),
 											A2($elm$html$Html$Attributes$style, 'height', '25px')
 										]),
-									_List_fromArray(
-										[
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(1))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('January')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(2))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('February')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(3))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('March')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(4))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('April')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(5))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('May')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(6))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('June')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(7))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('July')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(8))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('August')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(9))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('September')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(10))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('October')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(11))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('November')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(12))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('December')
-												]))
-										])),
+									birth_month_options),
 									A2(
 									$elm$html$Html$select,
 									_List_fromArray(
@@ -13746,7 +13697,7 @@ var $author$project$Main$viewPerson1 = F3(
 											$elm$html$Html$Attributes$class('ml-2 text-center w-24'),
 											A2($elm$html$Html$Attributes$style, 'height', '25px')
 										]),
-									$author$project$Main$viewPossibleBirthYears(m))
+									A2($author$project$Main$viewPossibleBirthYears, m, m.client_1.birth_year))
 								]))
 						])),
 					factor_in_social_sec ? A2(
@@ -13792,108 +13743,7 @@ var $author$project$Main$viewPerson1 = F3(
 													$elm$html$Html$Attributes$class('w-24 text-center'),
 													A2($elm$html$Html$Attributes$style, 'height', '25px')
 												]),
-											_List_fromArray(
-												[
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(62))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('62')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(63))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('63')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(64))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('64')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(65))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('65')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(66))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('66')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(67))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('67')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(68))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('68')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(69))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('69')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(70))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('70')
-														]))
-												]))
+											birth_month_options)
 										]))
 								])),
 							A2(
@@ -14049,141 +13899,7 @@ var $author$project$Main$viewPerson1 = F3(
 													$elm$html$Html$Attributes$class('mx-2 font-bold text-lg font-bold'),
 													A2($elm$html$Html$Attributes$style, 'font-family', 'Lato, sans-serif')
 												]),
-											_List_fromArray(
-												[
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(1))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('January')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(2))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('February')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(3))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('March')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(4))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('April')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(5))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('May')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(6))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('June')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(7))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('July')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(8))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('August')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(9))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('September')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(10))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('October')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(11))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('November')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(12))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('December')
-														]))
-												])),
+											birth_month_options),
 											A2(
 											$elm$html$Html$select,
 											_List_fromArray(
@@ -14194,7 +13910,7 @@ var $author$project$Main$viewPerson1 = F3(
 													$elm$html$Html$Attributes$class('mx-2 font-bold text-lg font-bold'),
 													A2($elm$html$Html$Attributes$style, 'font-family', 'Lato, sans-serif')
 												]),
-											$author$project$Main$viewPossibleBirthYears(m))
+											A2($author$project$Main$viewPossibleBirthYears, m, m.client_1.birth_year))
 										]))
 								])),
 							factor_in_social_sec ? A2(
@@ -14463,6 +14179,36 @@ var $author$project$Main$UpdateSocialSecurityStartMonthClient2 = function (a) {
 };
 var $author$project$Main$viewPerson2 = F3(
 	function (m, as_quiz, factor_in_social_sec) {
+		var months = A2($elm$core$List$range, 1, 12);
+		var birth_month_options = A2(
+			$elm$core$List$map,
+			function (x) {
+				return _Utils_eq(m.client_2.birth_month, x) ? A2(
+					$elm$html$Html$option,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$selected(true),
+							$elm$html$Html$Attributes$value(
+							$elm$core$String$fromInt(x))
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$author$project$Main$intToMonthStr(x))
+						])) : A2(
+					$elm$html$Html$option,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$value(
+							$elm$core$String$fromInt(x))
+						]),
+					_List_fromArray(
+						[
+							$elm$html$Html$text(
+							$author$project$Main$intToMonthStr(x))
+						]));
+			},
+			months);
 		return as_quiz ? $author$project$Main$viewStandardQuizQuestion(
 			_List_fromArray(
 				[
@@ -14518,141 +14264,7 @@ var $author$project$Main$viewPerson2 = F3(
 											$elm$html$Html$Attributes$class('text-center w-24'),
 											A2($elm$html$Html$Attributes$style, 'height', '25px')
 										]),
-									_List_fromArray(
-										[
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(1))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('January')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(2))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('February')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(3))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('March')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(4))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('April')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(5))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('May')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(6))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('June')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(7))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('July')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(8))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('August')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(9))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('September')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(10))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('October')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(11))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('November')
-												])),
-											A2(
-											$elm$html$Html$option,
-											_List_fromArray(
-												[
-													$elm$html$Html$Attributes$value(
-													$elm$core$String$fromInt(12))
-												]),
-											_List_fromArray(
-												[
-													$elm$html$Html$text('December')
-												]))
-										])),
+									birth_month_options),
 									A2(
 									$elm$html$Html$select,
 									_List_fromArray(
@@ -14661,7 +14273,7 @@ var $author$project$Main$viewPerson2 = F3(
 											$elm$html$Html$Attributes$class('ml-2 text-center w-24'),
 											A2($elm$html$Html$Attributes$style, 'height', '25px')
 										]),
-									$author$project$Main$viewPossibleBirthYears(m))
+									A2($author$project$Main$viewPossibleBirthYears, m, m.client_2.birth_year))
 								]))
 						])),
 					factor_in_social_sec ? A2(
@@ -14707,108 +14319,7 @@ var $author$project$Main$viewPerson2 = F3(
 													$elm$html$Html$Attributes$class('w-24 text-center'),
 													A2($elm$html$Html$Attributes$style, 'height', '25px')
 												]),
-											_List_fromArray(
-												[
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(62))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('62')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(63))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('63')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(64))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('64')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(65))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('65')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(66))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('66')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(67))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('67')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(68))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('68')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(69))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('69')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(70))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('70')
-														]))
-												]))
+											birth_month_options)
 										]))
 								])),
 							A2(
@@ -14965,141 +14476,7 @@ var $author$project$Main$viewPerson2 = F3(
 													$elm$html$Html$Attributes$class('mx-2 font-bold text-lg font-bold'),
 													A2($elm$html$Html$Attributes$style, 'font-family', 'Lato, sans-serif')
 												]),
-											_List_fromArray(
-												[
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(1))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('January')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(2))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('February')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(3))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('March')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(4))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('April')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(5))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('May')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(6))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('June')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(7))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('July')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(8))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('August')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(9))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('September')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(10))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('October')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(11))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('November')
-														])),
-													A2(
-													$elm$html$Html$option,
-													_List_fromArray(
-														[
-															$elm$html$Html$Attributes$value(
-															$elm$core$String$fromInt(12))
-														]),
-													_List_fromArray(
-														[
-															$elm$html$Html$text('December')
-														]))
-												])),
+											birth_month_options),
 											A2(
 											$elm$html$Html$select,
 											_List_fromArray(
@@ -15110,7 +14487,7 @@ var $author$project$Main$viewPerson2 = F3(
 													$elm$html$Html$Attributes$class('mx-2 font-bold text-lg font-bold'),
 													A2($elm$html$Html$Attributes$style, 'font-family', 'Lato, sans-serif')
 												]),
-											$author$project$Main$viewPossibleBirthYears(m))
+											A2($author$project$Main$viewPossibleBirthYears, m, m.client_2.birth_year))
 										]))
 								])),
 							factor_in_social_sec ? A2(
@@ -15365,7 +14742,7 @@ var $author$project$Main$viewPersonDateOfBirth = F3(
 			$elm$html$Html$div,
 			_List_fromArray(
 				[
-					$elm$html$Html$Attributes$class('w-full')
+					$elm$html$Html$Attributes$class('w-full flex flex-col items-center')
 				]),
 			_List_fromArray(
 				[
@@ -15379,9 +14756,17 @@ var $author$project$Main$viewPersonDateOfBirth = F3(
 					_List_Nil)
 				]));
 	});
+var $author$project$Main$PlanTypeModel = {$: 'PlanTypeModel'};
 var $author$project$Main$TogglePlanType = function (a) {
 	return {$: 'TogglePlanType', a: a};
 };
+var $elm$svg$Svg$Attributes$height = _VirtualDom_attribute('height');
+var $elm$svg$Svg$Attributes$points = _VirtualDom_attribute('points');
+var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
+var $elm$svg$Svg$polygon = $elm$svg$Svg$trustedNode('polygon');
+var $elm$svg$Svg$Attributes$style = _VirtualDom_attribute('style');
+var $elm$svg$Svg$svg = $elm$svg$Svg$trustedNode('svg');
+var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
 var $author$project$Main$viewPlanType = function (m) {
 	return A2(
 		$elm$html$Html$div,
@@ -15392,18 +14777,110 @@ var $author$project$Main$viewPlanType = function (m) {
 		_List_fromArray(
 			[
 				A2(
-				$elm$html$Html$h4,
+				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('text-xl text-center font-bold uppercase'),
-						A2($elm$html$Html$Attributes$style, 'font-size', '25px'),
-						A2($elm$html$Html$Attributes$style, 'color', $author$project$Main$greenBackground),
-						A2($elm$html$Html$Attributes$style, 'font-family', 'Lato, sans-serif'),
-						A2($elm$html$Html$Attributes$style, 'letter-spacing', '1.44px')
+						$elm$html$Html$Attributes$class('flex')
 					]),
 				_List_fromArray(
 					[
-						$elm$html$Html$text('What type of plan would you like?')
+						A2(
+						$elm$html$Html$h4,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('text-xl text-center font-bold uppercase'),
+								A2($elm$html$Html$Attributes$style, 'font-size', '25px'),
+								A2($elm$html$Html$Attributes$style, 'color', $author$project$Main$greenBackground),
+								A2($elm$html$Html$Attributes$style, 'font-family', 'Lato, sans-serif'),
+								A2($elm$html$Html$Attributes$style, 'letter-spacing', '1.44px')
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('What type of plan would you like?')
+							])),
+						A2(
+						$elm$html$Html$div,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$class('relative')
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$elm$html$Html$img,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$src('https://www.deckerretirementplanning.com/wp-content/uploads/2020/12/gold-question-bubble.png'),
+										$elm$html$Html$Attributes$class('object-contain self-start'),
+										A2($elm$html$Html$Attributes$style, 'margin-top', '-10px'),
+										$elm$html$Html$Events$onClick($author$project$Main$PlanTypeModel)
+									]),
+								_List_Nil),
+								m.plan_modal_is_visible ? A2(
+								$elm$html$Html$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										$elm$html$Html$div,
+										_List_fromArray(
+											[
+												$elm$html$Html$Attributes$class('flex flex-col text-xl text-center font-bold uppercase absolute top-0 right-0 flex bg-white text-center p-6'),
+												A2($elm$html$Html$Attributes$style, 'margin-top', '-175px'),
+												A2($elm$html$Html$Attributes$style, 'margin-right', '-200px'),
+												A2($elm$html$Html$Attributes$style, 'border', '8px solid' + $author$project$Main$goldBackground),
+												A2($elm$html$Html$Attributes$style, 'font-size', '12px'),
+												A2($elm$html$Html$Attributes$style, 'color', $author$project$Main$greenBackground),
+												A2($elm$html$Html$Attributes$style, 'font-family', 'Lato, sans-serif'),
+												A2($elm$html$Html$Attributes$style, 'letter-spacing', '1.44px')
+											]),
+										_List_fromArray(
+											[
+												A2(
+												$elm$html$Html$span,
+												_List_Nil,
+												_List_fromArray(
+													[
+														$elm$html$Html$text('If you want to know which is right for you give us a call')
+													])),
+												A2(
+												$elm$html$Html$span,
+												_List_Nil,
+												_List_fromArray(
+													[
+														$elm$html$Html$text('(855) 425-4566')
+													]))
+											])),
+										A2(
+										$elm$svg$Svg$svg,
+										_List_fromArray(
+											[
+												$elm$svg$Svg$Attributes$height('30'),
+												$elm$svg$Svg$Attributes$width('30'),
+												A2($elm$html$Html$Attributes$style, 'margin-top', '-40px')
+											]),
+										_List_fromArray(
+											[
+												A2(
+												$elm$svg$Svg$polygon,
+												_List_fromArray(
+													[
+														$elm$svg$Svg$Attributes$points('0,0 30,0 15,15'),
+														$elm$svg$Svg$Attributes$style('fill:' + ($author$project$Main$goldBackground + (';stroke:' + ($author$project$Main$goldBackground + ';stroke-width:1'))))
+													]),
+												_List_Nil)
+											]))
+									])) : A2(
+								$elm$html$Html$div,
+								_List_fromArray(
+									[
+										$elm$html$Html$Attributes$class('hidden')
+									]),
+								_List_fromArray(
+									[
+										$elm$html$Html$text('your mother was a hamster')
+									]))
+							]))
 					])),
 				A2(
 				$elm$html$Html$div,
@@ -15453,15 +14930,7 @@ var $author$project$Main$viewPlanType = function (m) {
 											[
 												$elm$html$Html$text('3 Bucket Plan')
 											]))
-									])),
-								A2(
-								$elm$html$Html$img,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$src('https://www.deckerretirementplanning.com/wp-content/uploads/2020/11/Question-Bubble-Element-1.png'),
-										$elm$html$Html$Attributes$class('object-contain self-start')
-									]),
-								_List_Nil)
+									]))
 							])),
 						A2(
 						$elm$html$Html$div,
@@ -15503,15 +14972,7 @@ var $author$project$Main$viewPlanType = function (m) {
 											[
 												$elm$html$Html$text('5 Bucket Plan')
 											]))
-									])),
-								A2(
-								$elm$html$Html$img,
-								_List_fromArray(
-									[
-										$elm$html$Html$Attributes$src('https://www.deckerretirementplanning.com/wp-content/uploads/2020/11/Question-Bubble-Element-1.png'),
-										$elm$html$Html$Attributes$class('object-contain self-start')
-									]),
-								_List_Nil)
+									]))
 							]))
 					]))
 			]));
@@ -16965,4 +16426,4 @@ var $author$project$Main$view = function (model) {
 var $author$project$Main$main = $elm$browser$Browser$element(
 	{init: $author$project$Main$init, subscriptions: $author$project$Main$subscriptions, update: $author$project$Main$update, view: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{},"unions":{"Main.Msg":{"args":[],"tags":{"Calculate":[],"InsertNewIncome":[],"DeleteIncome":["String.String"],"UpdateStartingIncome":["String.String"],"UpdateStartingIncomeAsQuiz":["String.String"],"UpdateSocialSecAgeClient1":["String.String"],"UpdateSocialSecAgeClient2":["String.String"],"UpdateSocialSecurityMontlhlyIncomeClient1":["String.String"],"UpdateSocialSecurityMontlhlyIncomeClient2":["String.String"],"UpdateOtherIncomeName":["String.String","String.String"],"UpdateOtherMonthlyIncome":["String.String","String.String"],"UpdateStartYear":["String.String","String.String"],"UpdateEndYear":["String.String","String.String"],"UpdateAnnualGrowthPercentage":["String.String","String.String"],"UpdateSocialSecurityStartMonthClient1":["String.String"],"UpdateSocialSecurityStartMonthClient2":["String.String"],"UpdateBirthYearClient1":["String.String"],"UpdateBirthYearClient2":["String.String"],"Now":["Time.Posix"],"ToggleClient2":[],"TogglePlanType":["String.String"],"ToggleNumberOfPeopleOnPlan":["String.String"],"ToggleFactorInSocialSecurity":["String.String"],"ToggleFactorInOtherIncome":["String.String"],"ToggleHasAnsweredNumPeople":[],"HasClickedGetStarted":[],"PersonBirthdayAndSocialErrorCheckClient1":["String.String"],"PersonBirthdayAndSocialErrorCheckClient2":["String.String"],"ToggleAnsweredDateOfBirthClient1":[],"ToggleAnsweredDateOfBirthClient2":[],"HasAnsweredOtherIncome":[],"HasAnsweredFactorInSocialSecurity":[],"ToggleAnsweredFactorInSocialSec":[],"HasAnsweredFactorInOtherIncome":[],"ToggleFullCalculator":[],"NoOp":[],"ToggleGrossTargetIncome":[],"ToggleAnsweredFactorInOtherIncome":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"String.String":{"args":[],"tags":{"String":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}}}}})}});}(this));
+	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{},"unions":{"Main.Msg":{"args":[],"tags":{"Calculate":[],"InsertNewIncome":[],"DeleteIncome":["String.String"],"UpdateStartingIncome":["String.String"],"UpdateStartingIncomeAsQuiz":["String.String"],"UpdateSocialSecAgeClient1":["String.String"],"UpdateSocialSecAgeClient2":["String.String"],"UpdateSocialSecurityMontlhlyIncomeClient1":["String.String"],"UpdateSocialSecurityMontlhlyIncomeClient2":["String.String"],"UpdateOtherIncomeName":["String.String","String.String"],"UpdateOtherMonthlyIncome":["String.String","String.String"],"UpdateStartYear":["String.String","String.String"],"UpdateEndYear":["String.String","String.String"],"UpdateAnnualGrowthPercentage":["String.String","String.String"],"UpdateSocialSecurityStartMonthClient1":["String.String"],"UpdateSocialSecurityStartMonthClient2":["String.String"],"UpdateBirthYearClient1":["String.String"],"UpdateBirthYearClient2":["String.String"],"Now":["Time.Posix"],"ToggleClient2":[],"TogglePlanType":["String.String"],"ToggleNumberOfPeopleOnPlan":["String.String"],"ToggleFactorInSocialSecurity":["String.String"],"ToggleFactorInOtherIncome":["String.String"],"ToggleHasAnsweredNumPeople":[],"HasClickedGetStarted":[],"PersonBirthdayAndSocialErrorCheckClient1":["String.String"],"PersonBirthdayAndSocialErrorCheckClient2":["String.String"],"ToggleAnsweredDateOfBirthClient1":[],"ToggleAnsweredDateOfBirthClient2":[],"HasAnsweredOtherIncome":[],"HasAnsweredFactorInSocialSecurity":[],"ToggleAnsweredFactorInSocialSec":[],"HasAnsweredFactorInOtherIncome":[],"ToggleFullCalculator":[],"NoOp":[],"ToggleGrossTargetIncome":[],"ToggleAnsweredFactorInOtherIncome":[],"PlanTypeModel":[]}},"Time.Posix":{"args":[],"tags":{"Posix":["Basics.Int"]}},"String.String":{"args":[],"tags":{"String":[]}},"Basics.Int":{"args":[],"tags":{"Int":[]}}}}})}});}(this));
